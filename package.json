@@ -1,0 +1,10 @@
+{
+  "name": "Scene",
+  "version": "1.0.0",
+  "dependencies": {},
+  "lotus": {
+    "plugins": [
+      "lotus-coffee"
+    ]
+  }
+}
