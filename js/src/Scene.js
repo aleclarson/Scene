@@ -1,4 +1,4 @@
-var Component, emptyFunction, throwFailure, type;
+var Component, emptyFunction, getArgProp, throwFailure, type;
 
 require("isDev");
 
@@ -7,6 +7,8 @@ throwFailure = require("failure").throwFailure;
 Component = require("component").Component;
 
 emptyFunction = require("emptyFunction");
+
+getArgProp = require("getArgProp");
 
 type = Component.Type("Scene");
 
@@ -17,12 +19,12 @@ type.loadComponent(function() {
 type.defineStatics({
   Chain: {
     lazy: function() {
-      return require("./Chain");
+      return require("./SceneChain");
     }
   },
   Collection: {
     lazy: function() {
-      return require("./Collection");
+      return require("./SceneCollection");
     }
   }
 });
@@ -49,18 +51,10 @@ type.optionDefaults = {
 };
 
 type.defineReactiveValues({
-  _level: function(options) {
-    return options.level;
-  },
-  isHidden: function(options) {
-    return options.isHidden;
-  },
-  ignoreTouches: function(options) {
-    return options.ignoreTouches;
-  },
-  ignoreTouchesBelow: function(options) {
-    return options.ignoreTouchesBelow;
-  }
+  _level: getArgProp("level"),
+  isHidden: getArgProp("isHidden"),
+  ignoreTouches: getArgProp("ignoreTouches"),
+  ignoreTouchesBelow: getArgProp("ignoreTouchesBelow")
 });
 
 type.defineValues({

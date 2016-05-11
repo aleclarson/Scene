@@ -5,6 +5,7 @@ require "isDev"
 { Component } = require "component"
 
 emptyFunction = require "emptyFunction"
+getArgProp = require "getArgProp"
 
 type = Component.Type "Scene"
 
@@ -14,10 +15,10 @@ type.loadComponent ->
 type.defineStatics
 
   Chain: lazy: ->
-    require "./Chain"
+    require "./SceneChain"
 
   Collection: lazy: ->
-    require "./Collection"
+    require "./SceneCollection"
 
 if isDev
   global.scenes = Object.create null
@@ -37,13 +38,13 @@ type.optionDefaults =
 
 type.defineReactiveValues
 
-  _level: (options) -> options.level
+  _level: getArgProp "level"
 
-  isHidden: (options) -> options.isHidden
+  isHidden: getArgProp "isHidden"
 
-  ignoreTouches: (options) -> options.ignoreTouches
+  ignoreTouches: getArgProp "ignoreTouches"
 
-  ignoreTouchesBelow: (options) -> options.ignoreTouchesBelow
+  ignoreTouchesBelow: getArgProp "ignoreTouchesBelow"
 
 type.defineValues
 
