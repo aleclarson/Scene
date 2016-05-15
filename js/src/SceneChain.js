@@ -1,6 +1,8 @@
-var Scene, Type, assert, assertType, ref, type;
+var Scene, Type, assert, assertType, type;
 
-ref = require("type-utils"), assert = ref.assert, assertType = ref.assertType;
+assertType = require("assertType");
+
+assert = require("assert");
 
 Type = require("Type");
 

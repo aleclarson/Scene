@@ -12,18 +12,6 @@ type = Component.Type "Scene"
 type.loadComponent ->
   require "./SceneView"
 
-type.defineStatics
-
-  Chain: lazy: ->
-    require "./SceneChain"
-
-  Collection: lazy: ->
-    require "./SceneCollection"
-
-if isDev
-  global.scenes = Object.create null
-  type.initInstance -> global.scenes[@__id] = this
-
 type.optionTypes =
   level: Number
   isHidden: Boolean
@@ -35,6 +23,10 @@ type.optionDefaults =
   isHidden: yes
   ignoreTouches: no
   ignoreTouchesBelow: no
+
+if isDev
+  global.scenes = Object.create null
+  type.initInstance -> global.scenes[@__id] = this
 
 type.defineReactiveValues
 
@@ -89,5 +81,13 @@ type.defineStyles
   content:
     presets: [ "cover", "clear" ]
     scale: -> @view.scale
+
+type.defineStatics
+
+  Chain: lazy: ->
+    require "./SceneChain"
+
+  Collection: lazy: ->
+    require "./SceneCollection"
 
 module.exports = type.build()

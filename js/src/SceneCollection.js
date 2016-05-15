@@ -1,8 +1,12 @@
-var Component, Scene, assertType, isType, ref, type;
-
-ref = require("type-utils"), isType = ref.isType, assertType = ref.assertType;
+var Component, Scene, SortedArray, assertType, isType, type;
 
 Component = require("component").Component;
+
+SortedArray = require("sorted-array");
+
+assertType = require("assertType");
+
+isType = require("isType");
 
 Scene = require("./Scene");
 
@@ -67,16 +71,16 @@ type.defineMethods({
     }
   },
   searchBelow: function(scene, filter) {
-    var i, len, ref1, result, results;
+    var i, len, ref, result, results;
     assertType(scene, Scene.Kind);
     assert(scene.collection === this, "Scene does not belong to this collection!");
     if (filter == null) {
       filter = emptyFunction.thatReturnsTrue;
     }
     results = [];
-    ref1 = this._scenes.array;
-    for (i = 0, len = ref1.length; i < len; i++) {
-      result = ref1[i];
+    ref = this._scenes.array;
+    for (i = 0, len = ref.length; i < len; i++) {
+      result = ref[i];
       if (result === scene) {
         return;
       }

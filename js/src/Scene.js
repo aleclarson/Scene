@@ -16,26 +16,6 @@ type.loadComponent(function() {
   return require("./SceneView");
 });
 
-type.defineStatics({
-  Chain: {
-    lazy: function() {
-      return require("./SceneChain");
-    }
-  },
-  Collection: {
-    lazy: function() {
-      return require("./SceneCollection");
-    }
-  }
-});
-
-if (isDev) {
-  global.scenes = Object.create(null);
-  type.initInstance(function() {
-    return global.scenes[this.__id] = this;
-  });
-}
-
 type.optionTypes = {
   level: Number,
   isHidden: Boolean,
@@ -49,6 +29,13 @@ type.optionDefaults = {
   ignoreTouches: false,
   ignoreTouchesBelow: false
 };
+
+if (isDev) {
+  global.scenes = Object.create(null);
+  type.initInstance(function() {
+    return global.scenes[this.__id] = this;
+  });
+}
 
 type.defineReactiveValues({
   _level: getArgProp("level"),
@@ -102,6 +89,19 @@ type.defineStyles({
     presets: ["cover", "clear"],
     scale: function() {
       return this.view.scale;
+    }
+  }
+});
+
+type.defineStatics({
+  Chain: {
+    lazy: function() {
+      return require("./SceneChain");
+    }
+  },
+  Collection: {
+    lazy: function() {
+      return require("./SceneCollection");
     }
   }
 });

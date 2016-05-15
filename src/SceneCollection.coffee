@@ -1,6 +1,9 @@
 
-{ isType, assertType } = require "type-utils"
 { Component } = require "component"
+
+SortedArray = require "sorted-array"
+assertType = require "assertType"
+isType = require "isType"
 
 Scene = require "./Scene"
 

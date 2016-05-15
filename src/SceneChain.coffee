@@ -1,6 +1,6 @@
 
-{ assert, assertType } = require "type-utils"
-
+assertType = require "assertType"
+assert = require "assert"
 Type = require "Type"
 
 Scene = require "./Scene"
