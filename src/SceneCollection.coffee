@@ -1,16 +1,14 @@
 
-{ Component } = require "component"
+{ Component, Style, View } = require "component"
 
 SortedArray = require "sorted-array"
 assertType = require "assertType"
 isType = require "isType"
+assert = require "assert"
 
 Scene = require "./Scene"
 
 type = Component.Type "SceneCollection"
-
-type.loadComponent ->
-  require "./SceneCollectionView"
 
 type.defineProperties
 
@@ -18,10 +16,12 @@ type.defineProperties
     @_scenes.array
 
   visibleScenes: get: ->
-    @scenes.filter (s) -> not s.isHidden
+    @scenes.filter (scene) ->
+      not scene.isHidden
 
   hiddenScenes: get: ->
-    @scenes.filter (s) -> s.isHidden
+    @scenes.filter (scene) ->
+      scene.isHidden
 
 type.defineValues
 
@@ -38,7 +38,7 @@ type.defineMethods
     assertType scene, Scene.Kind
     assert scene.collection is null, "Scenes can only belong to one collection at a time!"
 
-    scene.collection = this
+    scene._collection = this
     scene.__onInsert this
 
     @_scenes.insert scene
@@ -51,7 +51,7 @@ type.defineMethods
     assert scene.collection is this, "Scene does not belong to this collection!"
 
     scene.__onRemove this
-    scene.collection = null
+    scene._collection = null
 
     @_scenes.remove scene
     delete @_elements[scene.__id]
@@ -76,5 +76,25 @@ type.defineMethods
       results.push result
 
     return results
+
+#
+# Rendering
+#
+
+type.propTypes =
+  style: Style
+
+type.shouldUpdate ->
+  return no
+
+type.render (props) ->
+
+  children = []
+  for scene in @_scenes.array
+    children.push @_elements[scene.__name] ?= scene._render { key: scene.__name }
+
+  return View
+    style: props.style
+    children: children
 
 module.exports = type.build()

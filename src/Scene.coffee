@@ -1,16 +1,13 @@
 
 require "isDev"
 
+{ Component, Style, Children, View } = require "component"
 { throwFailure } = require "failure"
-{ Component } = require "component"
 
 emptyFunction = require "emptyFunction"
 getArgProp = require "getArgProp"
 
 type = Component.Type "Scene"
-
-type.loadComponent ->
-  require "./SceneView"
 
 type.optionTypes =
   level: Number
@@ -59,6 +56,15 @@ type.defineProperties
     return no unless @_chain
     return this is @_chain.last
 
+  isTouchable: get: ->
+    return no if @ignoreTouches
+    return yes
+
+  isTouchableBelow: get: ->
+    return no if @ignoreTouchesBelow
+    return yes if @ignoreTouches
+    return yes
+
 type.defineMethods
 
   __onInsert: emptyFunction
@@ -69,19 +75,6 @@ type.defineMethods
 
   __onRemove: emptyFunction
 
-type.defineStyles
-
-  container:
-    presets: [ "cover", "clear" ]
-    opacity: -> @view.opacity
-
-  background:
-    presets: [ "cover", "clear" ]
-
-  content:
-    presets: [ "cover", "clear" ]
-    scale: -> @view.scale
-
 type.defineStatics
 
   Chain: lazy: ->
@@ -89,5 +82,71 @@ type.defineStatics
 
   Collection: lazy: ->
     require "./SceneCollection"
+
+#
+# Rendering
+#
+
+type.propTypes =
+  style: Style
+  children: Children
+
+type.defineNativeValues
+
+  scale: 1
+
+  opacity: -> =>
+    if @isHidden then 0 else 1
+
+  containerEvents: -> =>
+    if @isHidden then "none" else "box-none"
+
+  contentEvents: -> =>
+    if @isTouchable then "box-none" else "none"
+
+  backgroundEvents: -> =>
+    if @isTouchableBelow then "none" else "auto"
+
+type.defineStyles
+
+  container:
+    cover: yes
+    clear: yes
+    opacity: -> @opacity
+
+  background:
+    cover: yes
+    clear: yes
+
+  content:
+    cover: yes
+    clear: yes
+    scale: -> @scale
+
+type.render ->
+  return View
+    style: @styles.container()
+    pointerEvents: @containerEvents
+    children: [
+      @__renderBackground()
+      @__renderContent()
+    ]
+
+type.defineMethods
+
+  __renderContent: ->
+    return View
+      children: @props.children
+      pointerEvents: @contentEvents
+      style: [
+        @styles.content()
+        @props.style
+      ]
+
+  __renderBackground: ->
+    return View
+      style: @styles.background()
+      pointerEvents: @backgroundEvents
+      onStartShouldSetResponder: emptyFunction.thatReturnsTrue
 
 module.exports = type.build()

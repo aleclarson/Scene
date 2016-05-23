@@ -24,7 +24,7 @@ type.defineMethods
 
     @last.__onInactive this if @last
 
-    scene.chain = this
+    scene._chain = this
     scene.__onActive this
 
     @scenes.push scene
@@ -33,11 +33,13 @@ type.defineMethods
 
   pop: ->
 
-    length = @scenes.length
+    { length } = @scenes
     if length is 0
       return
 
-    @scenes.pop().__onInactive this
+    scene = @scenes.pop()
+    scene.__onInactive this
+    scene._chain = null
 
     if length is 1
       @last = null

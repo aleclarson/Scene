@@ -27,18 +27,20 @@ type.defineMethods({
     if (this.last) {
       this.last.__onInactive(this);
     }
-    scene.chain = this;
+    scene._chain = this;
     scene.__onActive(this);
     this.scenes.push(scene);
     this.last = scene;
   },
   pop: function() {
-    var length;
+    var length, scene;
     length = this.scenes.length;
     if (length === 0) {
       return;
     }
-    this.scenes.pop().__onInactive(this);
+    scene = this.scenes.pop();
+    scene.__onInactive(this);
+    scene._chain = null;
     if (length === 1) {
       this.last = null;
       return;
