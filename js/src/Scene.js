@@ -186,9 +186,12 @@ type.render(function() {
 });
 
 type.defineMethods({
+  __getChildren: function() {
+    return this.props.children;
+  },
   __renderContent: function() {
     return View({
-      children: this.props.children,
+      children: this.__getChildren(),
       pointerEvents: this.contentEvents,
       style: [this.styles.content(), this.props.style]
     });

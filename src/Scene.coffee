@@ -134,9 +134,12 @@ type.render ->
 
 type.defineMethods
 
+  __getChildren: ->
+    @props.children
+
   __renderContent: ->
     return View
-      children: @props.children
+      children: @__getChildren()
       pointerEvents: @contentEvents
       style: [
         @styles.content()
