@@ -23,7 +23,8 @@ type.optionDefaults =
 
 if isDev
   global.scenes = Object.create null
-  type.initInstance -> global.scenes[@__id] = this
+  type.initInstance ->
+    global.scenes[@__name] = this
 
 type.defineReactiveValues
 
@@ -134,12 +135,12 @@ type.render ->
 
 type.defineMethods
 
-  __getChildren: ->
+  __renderChildren: ->
     @props.children
 
   __renderContent: ->
     return View
-      children: @__getChildren()
+      children: @__renderChildren()
       pointerEvents: @contentEvents
       style: [
         @styles.content()

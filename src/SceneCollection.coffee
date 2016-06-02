@@ -5,6 +5,7 @@ SortedArray = require "sorted-array"
 assertType = require "assertType"
 isType = require "isType"
 assert = require "assert"
+sync = require "sync"
 
 Scene = require "./Scene"
 
@@ -54,7 +55,7 @@ type.defineMethods
     scene._collection = null
 
     @_scenes.remove scene
-    delete @_elements[scene.__id]
+    delete @_elements[scene.__name]
     @_view.forceUpdate() if @_view
     return
 
@@ -87,14 +88,16 @@ type.propTypes =
 type.shouldUpdate ->
   return no
 
-type.render (props) ->
+type.render ->
 
-  children = []
-  for scene in @_scenes.array
-    children.push @_elements[scene.__name] ?= scene._render { key: scene.__name }
+  cache = @_elements
+  children = sync.map @_scenes.array, (scene) ->
+    key = scene.__name
+    return cache[key] if cache[key]
+    cache[key] = scene.render { key }
 
   return View
-    style: props.style
+    style: @props.style
     children: children
 
 module.exports = type.build()

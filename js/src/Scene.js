@@ -29,7 +29,7 @@ type.optionDefaults = {
 if (isDev) {
   global.scenes = Object.create(null);
   type.initInstance(function() {
-    return global.scenes[this.__id] = this;
+    return global.scenes[this.__name] = this;
   });
 }
 
@@ -186,12 +186,12 @@ type.render(function() {
 });
 
 type.defineMethods({
-  __getChildren: function() {
+  __renderChildren: function() {
     return this.props.children;
   },
   __renderContent: function() {
     return View({
-      children: this.__getChildren(),
+      children: this.__renderChildren(),
       pointerEvents: this.contentEvents,
       style: [this.styles.content(), this.props.style]
     });

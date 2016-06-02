@@ -1,4 +1,4 @@
-var Component, Scene, SortedArray, Style, View, assert, assertType, isType, ref, type;
+var Component, Scene, SortedArray, Style, View, assert, assertType, isType, ref, sync, type;
 
 ref = require("component"), Component = ref.Component, Style = ref.Style, View = ref.View;
 
@@ -9,6 +9,8 @@ assertType = require("assertType");
 isType = require("isType");
 
 assert = require("assert");
+
+sync = require("sync");
 
 Scene = require("./Scene");
 
@@ -63,7 +65,7 @@ type.defineMethods({
     scene.__onRemove(this);
     scene._collection = null;
     this._scenes.remove(scene);
-    delete this._elements[scene.__id];
+    delete this._elements[scene.__name];
     if (this._view) {
       this._view.forceUpdate();
     }
@@ -99,18 +101,21 @@ type.shouldUpdate(function() {
   return false;
 });
 
-type.render(function(props) {
-  var base, children, i, len, name, ref1, scene;
-  children = [];
-  ref1 = this._scenes.array;
-  for (i = 0, len = ref1.length; i < len; i++) {
-    scene = ref1[i];
-    children.push((base = this._elements)[name = scene.__name] != null ? base[name] : base[name] = scene._render({
-      key: scene.__name
-    }));
-  }
+type.render(function() {
+  var cache, children;
+  cache = this._elements;
+  children = sync.map(this._scenes.array, function(scene) {
+    var key;
+    key = scene.__name;
+    if (cache[key]) {
+      return cache[key];
+    }
+    return cache[key] = scene.render({
+      key: key
+    });
+  });
   return View({
-    style: props.style,
+    style: this.props.style,
     children: children
   });
 });
