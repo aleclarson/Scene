@@ -16,7 +16,16 @@ Scene = require("./Scene");
 
 type = Component.Type("SceneCollection");
 
-type.defineProperties({
+type.defineValues({
+  _elements: function() {
+    return {};
+  },
+  _scenes: function() {
+    return SortedArray.comparing("level");
+  }
+});
+
+type.definePrototype({
   scenes: {
     get: function() {
       return this._scenes.array;
@@ -38,16 +47,6 @@ type.defineProperties({
   }
 });
 
-type.defineValues({
-  _view: null,
-  _elements: function() {
-    return {};
-  },
-  _scenes: function() {
-    return SortedArray.comparing("level");
-  }
-});
-
 type.defineMethods({
   insert: function(scene) {
     assertType(scene, Scene.Kind);
@@ -55,8 +54,8 @@ type.defineMethods({
     scene._collection = this;
     scene.__onInsert(this);
     this._scenes.insert(scene);
-    if (this._view) {
-      this._view.forceUpdate();
+    if (this.view) {
+      this.view.forceUpdate();
     }
   },
   remove: function(scene) {
@@ -66,8 +65,8 @@ type.defineMethods({
     scene._collection = null;
     this._scenes.remove(scene);
     delete this._elements[scene.__name];
-    if (this._view) {
-      this._view.forceUpdate();
+    if (this.view) {
+      this.view.forceUpdate();
     }
   },
   searchBelow: function(scene, filter) {

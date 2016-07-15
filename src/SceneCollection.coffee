@@ -11,7 +11,13 @@ Scene = require "./Scene"
 
 type = Component.Type "SceneCollection"
 
-type.defineProperties
+type.defineValues
+
+  _elements: -> {}
+
+  _scenes: -> SortedArray.comparing "level"
+
+type.definePrototype
 
   scenes: get: ->
     @_scenes.array
@@ -24,14 +30,6 @@ type.defineProperties
     @scenes.filter (scene) ->
       scene.isHidden
 
-type.defineValues
-
-  _view: null
-
-  _elements: -> {}
-
-  _scenes: -> SortedArray.comparing "level"
-
 type.defineMethods
 
   insert: (scene) ->
@@ -43,7 +41,7 @@ type.defineMethods
     scene.__onInsert this
 
     @_scenes.insert scene
-    @_view.forceUpdate() if @_view
+    @view.forceUpdate() if @view
     return
 
   remove: (scene) ->
@@ -56,7 +54,7 @@ type.defineMethods
 
     @_scenes.remove scene
     delete @_elements[scene.__name]
-    @_view.forceUpdate() if @_view
+    @view.forceUpdate() if @view
     return
 
   searchBelow: (scene, filter) ->

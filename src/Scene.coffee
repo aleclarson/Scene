@@ -2,24 +2,29 @@
 require "isDev"
 
 { Component, Style, Children, View } = require "component"
-{ throwFailure } = require "failure"
 
 emptyFunction = require "emptyFunction"
 getArgProp = require "getArgProp"
 
 type = Component.Type "Scene"
 
-type.optionTypes =
-  level: Number
-  isHidden: Boolean
-  ignoreTouches: Boolean
-  ignoreTouchesBelow: Boolean
+type.defineOptions
 
-type.optionDefaults =
-  level: 0
-  isHidden: yes
-  ignoreTouches: no
-  ignoreTouchesBelow: no
+  level:
+    type: Number
+    default: 0
+
+  isHidden:
+    type: Boolean
+    default: yes
+
+  ignoreTouches:
+    type: Boolean
+    default: no
+
+  ignoreTouchesBelow:
+    type: Boolean
+    default: no
 
 if isDev
   global.scenes = Object.create null
@@ -28,13 +33,13 @@ if isDev
 
 type.defineReactiveValues
 
-  _level: getArgProp "level"
-
   isHidden: getArgProp "isHidden"
 
   ignoreTouches: getArgProp "ignoreTouches"
 
   ignoreTouchesBelow: getArgProp "ignoreTouchesBelow"
+
+  _level: getArgProp "level"
 
 type.defineValues
 
@@ -47,11 +52,13 @@ type.exposeGetters [
   "collection"
 ]
 
-type.defineProperties
+type.definePrototype
 
   level:
     get: -> @_level
-    set: -> # TODO: Implement scene.level setting
+    set: ->
+      # TODO: Implement scene.level setting
+      throw Error "Unimplemented!"
 
   isActive: get: ->
     return no unless @_chain

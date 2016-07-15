@@ -1,10 +1,8 @@
-var Children, Component, Style, View, emptyFunction, getArgProp, ref, throwFailure, type;
+var Children, Component, Style, View, emptyFunction, getArgProp, ref, type;
 
 require("isDev");
 
 ref = require("component"), Component = ref.Component, Style = ref.Style, Children = ref.Children, View = ref.View;
-
-throwFailure = require("failure").throwFailure;
 
 emptyFunction = require("emptyFunction");
 
@@ -12,19 +10,24 @@ getArgProp = require("getArgProp");
 
 type = Component.Type("Scene");
 
-type.optionTypes = {
-  level: Number,
-  isHidden: Boolean,
-  ignoreTouches: Boolean,
-  ignoreTouchesBelow: Boolean
-};
-
-type.optionDefaults = {
-  level: 0,
-  isHidden: true,
-  ignoreTouches: false,
-  ignoreTouchesBelow: false
-};
+type.defineOptions({
+  level: {
+    type: Number,
+    "default": 0
+  },
+  isHidden: {
+    type: Boolean,
+    "default": true
+  },
+  ignoreTouches: {
+    type: Boolean,
+    "default": false
+  },
+  ignoreTouchesBelow: {
+    type: Boolean,
+    "default": false
+  }
+});
 
 if (isDev) {
   global.scenes = Object.create(null);
@@ -34,10 +37,10 @@ if (isDev) {
 }
 
 type.defineReactiveValues({
-  _level: getArgProp("level"),
   isHidden: getArgProp("isHidden"),
   ignoreTouches: getArgProp("ignoreTouches"),
-  ignoreTouchesBelow: getArgProp("ignoreTouchesBelow")
+  ignoreTouchesBelow: getArgProp("ignoreTouchesBelow"),
+  _level: getArgProp("level")
 });
 
 type.defineValues({
@@ -47,12 +50,14 @@ type.defineValues({
 
 type.exposeGetters(["chain", "collection"]);
 
-type.defineProperties({
+type.definePrototype({
   level: {
     get: function() {
       return this._level;
     },
-    set: function() {}
+    set: function() {
+      throw Error("Unimplemented!");
+    }
   },
   isActive: {
     get: function() {
