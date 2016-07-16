@@ -4,7 +4,7 @@ require "isDev"
 { Component, Style, Children, View } = require "component"
 
 emptyFunction = require "emptyFunction"
-getArgProp = require "getArgProp"
+fromArgs = require "fromArgs"
 
 type = Component.Type "Scene"
 
@@ -33,13 +33,13 @@ if isDev
 
 type.defineReactiveValues
 
-  isHidden: getArgProp "isHidden"
+  isHidden: fromArgs "isHidden"
 
-  ignoreTouches: getArgProp "ignoreTouches"
+  ignoreTouches: fromArgs "ignoreTouches"
 
-  ignoreTouchesBelow: getArgProp "ignoreTouchesBelow"
+  ignoreTouchesBelow: fromArgs "ignoreTouchesBelow"
 
-  _level: getArgProp "level"
+  _level: fromArgs "level"
 
 type.defineValues
 
