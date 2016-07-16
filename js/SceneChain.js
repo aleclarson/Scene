@@ -52,4 +52,4 @@ type.defineMethods({
 
 module.exports = type.build();
 
-//# sourceMappingURL=../../map/src/SceneChain.map
+//# sourceMappingURL=map/SceneChain.map

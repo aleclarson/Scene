@@ -1,4 +1,4 @@
-var Children, Component, Style, View, emptyFunction, getArgProp, ref, type;
+var Children, Component, Style, View, emptyFunction, fromArgs, ref, type;
 
 require("isDev");
 
@@ -6,7 +6,7 @@ ref = require("component"), Component = ref.Component, Style = ref.Style, Childr
 
 emptyFunction = require("emptyFunction");
 
-getArgProp = require("getArgProp");
+fromArgs = require("fromArgs");
 
 type = Component.Type("Scene");
 
@@ -37,10 +37,10 @@ if (isDev) {
 }
 
 type.defineReactiveValues({
-  isHidden: getArgProp("isHidden"),
-  ignoreTouches: getArgProp("ignoreTouches"),
-  ignoreTouchesBelow: getArgProp("ignoreTouchesBelow"),
-  _level: getArgProp("level")
+  isHidden: fromArgs("isHidden"),
+  ignoreTouches: fromArgs("ignoreTouches"),
+  ignoreTouchesBelow: fromArgs("ignoreTouchesBelow"),
+  _level: fromArgs("level")
 });
 
 type.defineValues({
@@ -212,4 +212,4 @@ type.defineMethods({
 
 module.exports = type.build();
 
-//# sourceMappingURL=../../map/src/Scene.map
+//# sourceMappingURL=map/Scene.map

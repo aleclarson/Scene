@@ -121,4 +121,4 @@ type.render(function() {
 
 module.exports = type.build();
 
-//# sourceMappingURL=../../map/src/SceneCollection.map
+//# sourceMappingURL=map/SceneCollection.map
