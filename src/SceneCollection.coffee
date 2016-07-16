@@ -1,0 +1,101 @@
+
+{ Component, Style, View } = require "component"
+
+SortedArray = require "sorted-array"
+assertType = require "assertType"
+isType = require "isType"
+assert = require "assert"
+sync = require "sync"
+
+Scene = require "./Scene"
+
+type = Component.Type "SceneCollection"
+
+type.defineValues
+
+  _elements: -> {}
+
+  _scenes: -> SortedArray.comparing "level"
+
+type.definePrototype
+
+  scenes: get: ->
+    @_scenes.array
+
+  visibleScenes: get: ->
+    @scenes.filter (scene) ->
+      not scene.isHidden
+
+  hiddenScenes: get: ->
+    @scenes.filter (scene) ->
+      scene.isHidden
+
+type.defineMethods
+
+  insert: (scene) ->
+
+    assertType scene, Scene.Kind
+    assert scene.collection is null, "Scenes can only belong to one collection at a time!"
+
+    scene._collection = this
+    scene.__onInsert this
+
+    @_scenes.insert scene
+    @view.forceUpdate() if @view
+    return
+
+  remove: (scene) ->
+
+    assertType scene, Scene.Kind
+    assert scene.collection is this, "Scene does not belong to this collection!"
+
+    scene.__onRemove this
+    scene._collection = null
+
+    @_scenes.remove scene
+    delete @_elements[scene.__name]
+    @view.forceUpdate() if @view
+    return
+
+  searchBelow: (scene, filter) ->
+
+    assertType scene, Scene.Kind
+    assert scene.collection is this, "Scene does not belong to this collection!"
+
+    filter ?= emptyFunction.thatReturnsTrue
+
+    results = []
+
+    for result in @_scenes.array
+
+      return if result is scene
+
+      continue unless filter result
+
+      results.push result
+
+    return results
+
+#
+# Rendering
+#
+
+type.propTypes =
+  style: Style
+
+type.shouldUpdate ->
+  return no
+
+type.render ->
+
+  cache = @_elements
+  children = sync.map @_scenes.array, (scene) ->
+    key = scene.__name
+    return cache[key] if cache[key]
+    cache[key] = scene.render { key }
+
+  return View
+    style: @props.style
+    children: children
+
+module.exports = type.build()
