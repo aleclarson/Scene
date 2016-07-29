@@ -9,22 +9,10 @@ fromArgs = require "fromArgs"
 type = Component.Type "Scene"
 
 type.defineOptions
-
-  level:
-    type: Number
-    default: 0
-
-  isHidden:
-    type: Boolean
-    default: yes
-
-  ignoreTouches:
-    type: Boolean
-    default: no
-
-  ignoreTouchesBelow:
-    type: Boolean
-    default: no
+  level: Number.withDefault 0
+  isHidden: Boolean.withDefault yes
+  ignoreTouches: Boolean.withDefault no
+  ignoreTouchesBelow: Boolean.withDefault no
 
 if isDev
   global.scenes = Object.create null
@@ -41,16 +29,24 @@ type.defineReactiveValues
 
   _level: fromArgs "level"
 
-type.defineValues
-
   _chain: null
 
   _collection: null
 
-type.exposeGetters [
-  "chain"
-  "collection"
-]
+type.defineGetters
+
+  chain: -> @_chain
+
+  collection: -> @_collection
+
+  isTouchable: ->
+    return no if @ignoreTouches
+    return yes
+
+  isTouchableBelow: ->
+    return no if @ignoreTouchesBelow
+    return yes if @ignoreTouches
+    return yes
 
 type.definePrototype
 
@@ -60,20 +56,7 @@ type.definePrototype
       # TODO: Implement scene.level setting
       throw Error "Unimplemented!"
 
-  isActive: get: ->
-    return no unless @_chain
-    return this is @_chain.last
-
-  isTouchable: get: ->
-    return no if @ignoreTouches
-    return yes
-
-  isTouchableBelow: get: ->
-    return no if @ignoreTouchesBelow
-    return yes if @ignoreTouches
-    return yes
-
-type.defineMethods
+type.defineHooks
 
   __onInsert: emptyFunction
 
@@ -104,16 +87,22 @@ type.defineNativeValues
   scale: 1
 
   opacity: -> =>
-    if @isHidden then 0 else 1
+    return 0 if @_chain and @_chain.isHidden
+    return 0 if @isHidden
+    return 1
 
   containerEvents: -> =>
-    if @isHidden then "none" else "box-none"
+    return "none" if @_chain and @_chain.isHidden
+    return "none" if @isHidden
+    return "box-none"
 
   contentEvents: -> =>
-    if @isTouchable then "box-none" else "none"
+    return "box-none" if @isTouchable
+    return "none"
 
   backgroundEvents: -> =>
-    if @isTouchableBelow then "none" else "auto"
+    return "none" if @isTouchableBelow
+    return "auto"
 
 type.defineStyles
 
@@ -140,19 +129,16 @@ type.render ->
       @__renderContent()
     ]
 
-type.defineMethods
+type.defineHooks
 
   __renderChildren: ->
     @props.children
 
   __renderContent: ->
     return View
-      children: @__renderChildren()
+      style: @styles.content()
       pointerEvents: @contentEvents
-      style: [
-        @styles.content()
-        @props.style
-      ]
+      children: @__renderChildren()
 
   __renderBackground: ->
     return View

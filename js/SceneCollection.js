@@ -25,25 +25,19 @@ type.defineValues({
   }
 });
 
-type.definePrototype({
-  scenes: {
-    get: function() {
-      return this._scenes.array;
-    }
+type.defineGetters({
+  scenes: function() {
+    return this._scenes.array;
   },
-  visibleScenes: {
-    get: function() {
-      return this.scenes.filter(function(scene) {
-        return !scene.isHidden;
-      });
-    }
+  visibleScenes: function() {
+    return this.scenes.filter(function(scene) {
+      return !scene.isHidden;
+    });
   },
-  hiddenScenes: {
-    get: function() {
-      return this.scenes.filter(function(scene) {
-        return scene.isHidden;
-      });
-    }
+  hiddenScenes: function() {
+    return this.scenes.filter(function(scene) {
+      return scene.isHidden;
+    });
   }
 });
 
@@ -54,9 +48,7 @@ type.defineMethods({
     scene._collection = this;
     scene.__onInsert(this);
     this._scenes.insert(scene);
-    if (this.view) {
-      this.view.forceUpdate();
-    }
+    this.view && this.view.forceUpdate();
   },
   remove: function(scene) {
     assertType(scene, Scene.Kind);

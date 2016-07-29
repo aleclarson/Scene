@@ -17,16 +17,16 @@ type.defineValues
 
   _scenes: -> SortedArray.comparing "level"
 
-type.definePrototype
+type.defineGetters
 
-  scenes: get: ->
+  scenes: ->
     @_scenes.array
 
-  visibleScenes: get: ->
+  visibleScenes: ->
     @scenes.filter (scene) ->
       not scene.isHidden
 
-  hiddenScenes: get: ->
+  hiddenScenes: ->
     @scenes.filter (scene) ->
       scene.isHidden
 
@@ -41,7 +41,7 @@ type.defineMethods
     scene.__onInsert this
 
     @_scenes.insert scene
-    @view.forceUpdate() if @view
+    @view and @view.forceUpdate()
     return
 
   remove: (scene) ->

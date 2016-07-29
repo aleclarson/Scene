@@ -11,22 +11,10 @@ fromArgs = require("fromArgs");
 type = Component.Type("Scene");
 
 type.defineOptions({
-  level: {
-    type: Number,
-    "default": 0
-  },
-  isHidden: {
-    type: Boolean,
-    "default": true
-  },
-  ignoreTouches: {
-    type: Boolean,
-    "default": false
-  },
-  ignoreTouchesBelow: {
-    type: Boolean,
-    "default": false
-  }
+  level: Number.withDefault(0),
+  isHidden: Boolean.withDefault(true),
+  ignoreTouches: Boolean.withDefault(false),
+  ignoreTouchesBelow: Boolean.withDefault(false)
 });
 
 if (isDev) {
@@ -40,15 +28,34 @@ type.defineReactiveValues({
   isHidden: fromArgs("isHidden"),
   ignoreTouches: fromArgs("ignoreTouches"),
   ignoreTouchesBelow: fromArgs("ignoreTouchesBelow"),
-  _level: fromArgs("level")
-});
-
-type.defineValues({
+  _level: fromArgs("level"),
   _chain: null,
   _collection: null
 });
 
-type.exposeGetters(["chain", "collection"]);
+type.defineGetters({
+  chain: function() {
+    return this._chain;
+  },
+  collection: function() {
+    return this._collection;
+  },
+  isTouchable: function() {
+    if (this.ignoreTouches) {
+      return false;
+    }
+    return true;
+  },
+  isTouchableBelow: function() {
+    if (this.ignoreTouchesBelow) {
+      return false;
+    }
+    if (this.ignoreTouches) {
+      return true;
+    }
+    return true;
+  }
+});
 
 type.definePrototype({
   level: {
@@ -58,37 +65,10 @@ type.definePrototype({
     set: function() {
       throw Error("Unimplemented!");
     }
-  },
-  isActive: {
-    get: function() {
-      if (!this._chain) {
-        return false;
-      }
-      return this === this._chain.last;
-    }
-  },
-  isTouchable: {
-    get: function() {
-      if (this.ignoreTouches) {
-        return false;
-      }
-      return true;
-    }
-  },
-  isTouchableBelow: {
-    get: function() {
-      if (this.ignoreTouchesBelow) {
-        return false;
-      }
-      if (this.ignoreTouches) {
-        return true;
-      }
-      return true;
-    }
   }
 });
 
-type.defineMethods({
+type.defineHooks({
   __onInsert: emptyFunction,
   __onActive: emptyFunction,
   __onInactive: emptyFunction,
@@ -118,22 +98,26 @@ type.defineNativeValues({
   opacity: function() {
     return (function(_this) {
       return function() {
+        if (_this._chain && _this._chain.isHidden) {
+          return 0;
+        }
         if (_this.isHidden) {
           return 0;
-        } else {
-          return 1;
         }
+        return 1;
       };
     })(this);
   },
   containerEvents: function() {
     return (function(_this) {
       return function() {
+        if (_this._chain && _this._chain.isHidden) {
+          return "none";
+        }
         if (_this.isHidden) {
           return "none";
-        } else {
-          return "box-none";
         }
+        return "box-none";
       };
     })(this);
   },
@@ -142,9 +126,8 @@ type.defineNativeValues({
       return function() {
         if (_this.isTouchable) {
           return "box-none";
-        } else {
-          return "none";
         }
+        return "none";
       };
     })(this);
   },
@@ -153,9 +136,8 @@ type.defineNativeValues({
       return function() {
         if (_this.isTouchableBelow) {
           return "none";
-        } else {
-          return "auto";
         }
+        return "auto";
       };
     })(this);
   }
@@ -190,15 +172,15 @@ type.render(function() {
   });
 });
 
-type.defineMethods({
+type.defineHooks({
   __renderChildren: function() {
     return this.props.children;
   },
   __renderContent: function() {
     return View({
-      children: this.__renderChildren(),
+      style: this.styles.content(),
       pointerEvents: this.contentEvents,
-      style: [this.styles.content(), this.props.style]
+      children: this.__renderChildren()
     });
   },
   __renderBackground: function() {
