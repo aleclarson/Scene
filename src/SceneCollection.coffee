@@ -1,5 +1,6 @@
 
-{ Component, Style, View } = require "component"
+{Type, Style} = require "modx"
+{View} = require "modx/views"
 
 SortedArray = require "sorted-array"
 assertType = require "assertType"
@@ -9,7 +10,7 @@ sync = require "sync"
 
 Scene = require "./Scene"
 
-type = Component.Type "SceneCollection"
+type = Type "SceneCollection"
 
 type.defineValues
 
@@ -37,6 +38,7 @@ type.defineMethods
     assertType scene, Scene.Kind
     assert scene.collection is null, "Scenes can only belong to one collection at a time!"
 
+    log.it @__name + ".insert: " + scene.__name
     scene._collection = this
     scene.__onInsert this
 

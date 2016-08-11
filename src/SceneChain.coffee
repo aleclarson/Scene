@@ -74,8 +74,9 @@ type.defineMethods
     scene.__onInactive this
     scene._chain = null
 
-    @_collection and
-    @_collection.remove scene
+    if not scene.isPermanent
+      @_collection and
+      @_collection.remove scene
 
     if length is 1
       @last = null

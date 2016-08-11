@@ -1,6 +1,8 @@
-var Component, Scene, SortedArray, Style, View, assert, assertType, isType, ref, sync, type;
+var Scene, SortedArray, Style, Type, View, assert, assertType, isType, ref, sync, type;
 
-ref = require("component"), Component = ref.Component, Style = ref.Style, View = ref.View;
+ref = require("modx"), Type = ref.Type, Style = ref.Style;
+
+View = require("modx/views").View;
 
 SortedArray = require("sorted-array");
 
@@ -14,7 +16,7 @@ sync = require("sync");
 
 Scene = require("./Scene");
 
-type = Component.Type("SceneCollection");
+type = Type("SceneCollection");
 
 type.defineValues({
   _elements: function() {
@@ -45,6 +47,7 @@ type.defineMethods({
   insert: function(scene) {
     assertType(scene, Scene.Kind);
     assert(scene.collection === null, "Scenes can only belong to one collection at a time!");
+    log.it(this.__name + ".insert: " + scene.__name);
     scene._collection = this;
     scene.__onInsert(this);
     this._scenes.insert(scene);

@@ -1,18 +1,19 @@
-var Children, Component, Style, View, emptyFunction, fromArgs, ref, type;
+var Children, Style, Type, View, emptyFunction, ref, type;
 
 require("isDev");
 
-ref = require("component"), Component = ref.Component, Style = ref.Style, Children = ref.Children, View = ref.View;
+ref = require("modx"), Type = ref.Type, Style = ref.Style, Children = ref.Children;
+
+View = require("modx/views").View;
 
 emptyFunction = require("emptyFunction");
 
-fromArgs = require("fromArgs");
-
-type = Component.Type("Scene");
+type = Type("Scene");
 
 type.defineOptions({
   level: Number.withDefault(0),
-  isHidden: Boolean.withDefault(true),
+  isHidden: Boolean.withDefault(false),
+  isPermanent: Boolean.withDefault(false),
   ignoreTouches: Boolean.withDefault(false),
   ignoreTouchesBelow: Boolean.withDefault(false)
 });
@@ -24,13 +25,16 @@ if (isDev) {
   });
 }
 
-type.defineReactiveValues({
-  isHidden: fromArgs("isHidden"),
-  ignoreTouches: fromArgs("ignoreTouches"),
-  ignoreTouchesBelow: fromArgs("ignoreTouchesBelow"),
-  _level: fromArgs("level"),
-  _chain: null,
-  _collection: null
+type.defineReactiveValues(function(options) {
+  return {
+    isHidden: options.isHidden,
+    isPermanent: options.isPermanent,
+    ignoreTouches: options.ignoreTouches,
+    ignoreTouchesBelow: options.ignoreTouchesBelow,
+    _level: options.level,
+    _chain: null,
+    _collection: null
+  };
 });
 
 type.defineGetters({

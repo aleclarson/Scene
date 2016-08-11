@@ -1,16 +1,17 @@
 
 require "isDev"
 
-{ Component, Style, Children, View } = require "component"
+{Type, Style, Children} = require "modx"
+{View} = require "modx/views"
 
 emptyFunction = require "emptyFunction"
-fromArgs = require "fromArgs"
 
-type = Component.Type "Scene"
+type = Type "Scene"
 
 type.defineOptions
   level: Number.withDefault 0
-  isHidden: Boolean.withDefault yes
+  isHidden: Boolean.withDefault no
+  isPermanent: Boolean.withDefault no
   ignoreTouches: Boolean.withDefault no
   ignoreTouchesBelow: Boolean.withDefault no
 
@@ -19,15 +20,17 @@ if isDev
   type.initInstance ->
     global.scenes[@__name] = this
 
-type.defineReactiveValues
+type.defineReactiveValues (options) ->
 
-  isHidden: fromArgs "isHidden"
+  isHidden: options.isHidden
 
-  ignoreTouches: fromArgs "ignoreTouches"
+  isPermanent: options.isPermanent
 
-  ignoreTouchesBelow: fromArgs "ignoreTouchesBelow"
+  ignoreTouches: options.ignoreTouches
 
-  _level: fromArgs "level"
+  ignoreTouchesBelow: options.ignoreTouchesBelow
+
+  _level: options.level
 
   _chain: null
 

@@ -80,7 +80,9 @@ type.defineMethods({
     scene = this.scenes.pop();
     scene.__onInactive(this);
     scene._chain = null;
-    this._collection && this._collection.remove(scene);
+    if (!scene.isPermanent) {
+      this._collection && this._collection.remove(scene);
+    }
     if (length === 1) {
       this.last = null;
       return;
