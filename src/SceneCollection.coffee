@@ -82,7 +82,7 @@ type.defineMethods
 # Rendering
 #
 
-type.propTypes =
+type.defineProps
   style: Style
 
 type.shouldUpdate ->

@@ -81,7 +81,7 @@ type.defineStatics
 # Rendering
 #
 
-type.propTypes =
+type.defineProps
   style: Style
   children: Children
 

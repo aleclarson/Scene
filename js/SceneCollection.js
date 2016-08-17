@@ -87,9 +87,9 @@ type.defineMethods({
   }
 });
 
-type.propTypes = {
+type.defineProps({
   style: Style
-};
+});
 
 type.shouldUpdate(function() {
   return false;

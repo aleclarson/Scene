@@ -92,10 +92,10 @@ type.defineStatics({
   }
 });
 
-type.propTypes = {
+type.defineProps({
   style: Style,
   children: Children
-};
+});
 
 type.defineNativeValues({
   scale: 1,
