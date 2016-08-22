@@ -1,4 +1,4 @@
-var Scene, SortedArray, Style, Type, View, assert, assertType, isType, ref, sync, type;
+var Scene, SortedArray, Style, Type, View, assertType, isType, ref, sync, type;
 
 ref = require("modx"), Type = ref.Type, Style = ref.Style;
 
@@ -9,8 +9,6 @@ SortedArray = require("sorted-array");
 assertType = require("assertType");
 
 isType = require("isType");
-
-assert = require("assert");
 
 sync = require("sync");
 
@@ -46,8 +44,12 @@ type.defineGetters({
 type.defineMethods({
   insert: function(scene) {
     assertType(scene, Scene.Kind);
-    assert(scene.collection === null, "Scenes can only belong to one collection at a time!");
-    log.it(this.__name + ".insert: " + scene.__name);
+    if (scene.collection === this) {
+      return;
+    }
+    if (scene.collection !== null) {
+      throw Error("Scenes can only belong to one collection at a time!");
+    }
     scene._collection = this;
     scene.__onInsert(this);
     this._scenes.insert(scene);
@@ -55,19 +57,21 @@ type.defineMethods({
   },
   remove: function(scene) {
     assertType(scene, Scene.Kind);
-    assert(scene.collection === this, "Scene does not belong to this collection!");
+    if (scene.collection !== this) {
+      throw Error("Scene does not belong to this collection!");
+    }
     scene.__onRemove(this);
     scene._collection = null;
     this._scenes.remove(scene);
     delete this._elements[scene.__name];
-    if (this.view) {
-      this.view.forceUpdate();
-    }
+    this.view && this.view.forceUpdate();
   },
   searchBelow: function(scene, filter) {
     var i, len, ref1, result, results;
     assertType(scene, Scene.Kind);
-    assert(scene.collection === this, "Scene does not belong to this collection!");
+    if (scene.collection !== this) {
+      throw Error("Scene does not belong to this collection!");
+    }
     if (filter == null) {
       filter = emptyFunction.thatReturnsTrue;
     }
@@ -91,10 +95,6 @@ type.defineProps({
   style: Style
 });
 
-type.shouldUpdate(function() {
-  return false;
-});
-
 type.render(function() {
   var cache, children;
   cache = this._elements;
@@ -112,6 +112,10 @@ type.render(function() {
     style: this.props.style,
     children: children
   });
+});
+
+type.shouldUpdate(function() {
+  return false;
 });
 
 module.exports = type.build();

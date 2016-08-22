@@ -40,8 +40,6 @@ type.defineGetters
 
   chain: -> @_chain
 
-  collection: -> @_collection
-
   isTouchable: ->
     return no if @ignoreTouches
     return yes
@@ -52,6 +50,13 @@ type.defineGetters
     return yes
 
 type.definePrototype
+
+  collection:
+    get: -> @_collection
+    set: (newValue) ->
+      if newValue is null
+        @_collection.remove this
+      else newValue.insert this
 
   level:
     get: -> @_level
@@ -89,21 +94,21 @@ type.defineNativeValues
 
   scale: 1
 
-  opacity: -> =>
+  opacity: ->
     return 0 if @_chain and @_chain.isHidden
     return 0 if @isHidden
     return 1
 
-  containerEvents: -> =>
+  containerEvents: ->
     return "none" if @_chain and @_chain.isHidden
     return "none" if @isHidden
     return "box-none"
 
-  contentEvents: -> =>
+  contentEvents: ->
     return "box-none" if @isTouchable
     return "none"
 
-  backgroundEvents: -> =>
+  backgroundEvents: ->
     return "none" if @isTouchableBelow
     return "auto"
 

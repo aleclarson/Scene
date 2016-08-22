@@ -1,10 +1,6 @@
-var Scene, SceneCollection, Type, assert, assertType, fromArgs, sync, type;
+var Scene, SceneCollection, Type, assertType, sync, type;
 
 assertType = require("assertType");
-
-fromArgs = require("fromArgs");
-
-assert = require("assert");
 
 Type = require("Type");
 
@@ -21,16 +17,18 @@ type.defineOptions({
   collection: SceneCollection
 });
 
-type.defineValues({
-  scenes: function() {
-    return [];
-  },
-  _collection: fromArgs("collection")
+type.defineValues(function(options) {
+  return {
+    scenes: [],
+    _collection: options.collection
+  };
 });
 
-type.defineReactiveValues({
-  isHidden: fromArgs("isHidden"),
-  last: null
+type.defineReactiveValues(function(options) {
+  return {
+    isHidden: options.isHidden,
+    last: null
+  };
 });
 
 type.definePrototype({
@@ -63,7 +61,9 @@ type.definePrototype({
 type.defineMethods({
   push: function(scene) {
     assertType(scene, Scene.Kind);
-    assert(scene.chain === null, "Scenes can only belong to one chain at a time!");
+    if (scene.chain !== null) {
+      throw Error("Scenes can only belong to one chain at a time!");
+    }
     this.last && this.last.__onInactive(this);
     scene._chain = this;
     scene.__onActive(this);

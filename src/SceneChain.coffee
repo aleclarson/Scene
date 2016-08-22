@@ -1,7 +1,5 @@
 
 assertType = require "assertType"
-fromArgs = require "fromArgs"
-assert = require "assert"
 Type = require "Type"
 sync = require "sync"
 
@@ -14,15 +12,15 @@ type.defineOptions
   isHidden: Boolean.withDefault no
   collection: SceneCollection
 
-type.defineValues
+type.defineValues (options) ->
 
-  scenes: -> []
+  scenes: []
 
-  _collection: fromArgs "collection"
+  _collection: options.collection
 
-type.defineReactiveValues
+type.defineReactiveValues (options) ->
 
-  isHidden: fromArgs "isHidden"
+  isHidden: options.isHidden
 
   last: null
 
@@ -50,7 +48,9 @@ type.defineMethods
   push: (scene) ->
 
     assertType scene, Scene.Kind
-    assert scene.chain is null, "Scenes can only belong to one chain at a time!"
+
+    if scene.chain isnt null
+      throw Error "Scenes can only belong to one chain at a time!"
 
     @last and
     @last.__onInactive this

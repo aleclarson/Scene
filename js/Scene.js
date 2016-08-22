@@ -41,9 +41,6 @@ type.defineGetters({
   chain: function() {
     return this._chain;
   },
-  collection: function() {
-    return this._collection;
-  },
   isTouchable: function() {
     if (this.ignoreTouches) {
       return false;
@@ -62,6 +59,18 @@ type.defineGetters({
 });
 
 type.definePrototype({
+  collection: {
+    get: function() {
+      return this._collection;
+    },
+    set: function(newValue) {
+      if (newValue === null) {
+        return this._collection.remove(this);
+      } else {
+        return newValue.insert(this);
+      }
+    }
+  },
   level: {
     get: function() {
       return this._level;
@@ -100,50 +109,34 @@ type.defineProps({
 type.defineNativeValues({
   scale: 1,
   opacity: function() {
-    return (function(_this) {
-      return function() {
-        if (_this._chain && _this._chain.isHidden) {
-          return 0;
-        }
-        if (_this.isHidden) {
-          return 0;
-        }
-        return 1;
-      };
-    })(this);
+    if (this._chain && this._chain.isHidden) {
+      return 0;
+    }
+    if (this.isHidden) {
+      return 0;
+    }
+    return 1;
   },
   containerEvents: function() {
-    return (function(_this) {
-      return function() {
-        if (_this._chain && _this._chain.isHidden) {
-          return "none";
-        }
-        if (_this.isHidden) {
-          return "none";
-        }
-        return "box-none";
-      };
-    })(this);
+    if (this._chain && this._chain.isHidden) {
+      return "none";
+    }
+    if (this.isHidden) {
+      return "none";
+    }
+    return "box-none";
   },
   contentEvents: function() {
-    return (function(_this) {
-      return function() {
-        if (_this.isTouchable) {
-          return "box-none";
-        }
-        return "none";
-      };
-    })(this);
+    if (this.isTouchable) {
+      return "box-none";
+    }
+    return "none";
   },
   backgroundEvents: function() {
-    return (function(_this) {
-      return function() {
-        if (_this.isTouchableBelow) {
-          return "none";
-        }
-        return "auto";
-      };
-    })(this);
+    if (this.isTouchableBelow) {
+      return "none";
+    }
+    return "auto";
   }
 });
 
