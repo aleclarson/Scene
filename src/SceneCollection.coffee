@@ -59,7 +59,9 @@ type.defineMethods
     scene.__onRemove this
     scene._collection = null
 
-    @_scenes.remove scene
+    index = @_scenes.array.indexOf scene
+    @_scenes.array.splice index, 1
+
     delete @_elements[scene.__name]
     @view and @view.forceUpdate()
     return

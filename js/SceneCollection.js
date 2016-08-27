@@ -56,13 +56,15 @@ type.defineMethods({
     this.view && this.view.forceUpdate();
   },
   remove: function(scene) {
+    var index;
     assertType(scene, Scene.Kind);
     if (scene.collection !== this) {
       throw Error("Scene does not belong to this collection!");
     }
     scene.__onRemove(this);
     scene._collection = null;
-    this._scenes.remove(scene);
+    index = this._scenes.array.indexOf(scene);
+    this._scenes.array.splice(index, 1);
     delete this._elements[scene.__name];
     this.view && this.view.forceUpdate();
   },
