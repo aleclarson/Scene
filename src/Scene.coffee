@@ -1,10 +1,9 @@
 
-require "isDev"
-
 {Type, Style, Children} = require "modx"
 {View} = require "modx/views"
 
 emptyFunction = require "emptyFunction"
+isDev = require "isDev"
 
 type = Type "Scene"
 
