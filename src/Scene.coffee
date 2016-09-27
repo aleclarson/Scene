@@ -94,21 +94,21 @@ type.defineNativeValues
 
   scale: 1
 
-  opacity: ->
+  _opacity: ->
     return 0 if @_chain and @_chain.isHidden
     return 0 if @isHidden
     return 1
 
-  containerEvents: ->
+  _containerEvents: ->
     return "none" if @_chain and @_chain.isHidden
     return "none" if @isHidden
     return "box-none"
 
-  contentEvents: ->
+  _contentEvents: ->
     return "box-none" if @isTouchable
     return "none"
 
-  backgroundEvents: ->
+  _backgroundEvents: ->
     return "none" if @isTouchableBelow
     return "auto"
 
@@ -117,7 +117,7 @@ type.defineStyles
   container:
     cover: yes
     clear: yes
-    opacity: -> @opacity
+    opacity: -> @_opacity
 
   background:
     cover: yes
@@ -131,7 +131,7 @@ type.defineStyles
 type.render ->
   return View
     style: @styles.container()
-    pointerEvents: @containerEvents
+    pointerEvents: @_containerEvents
     children: [
       @__renderBackground()
       @__renderContent()
@@ -145,13 +145,13 @@ type.defineHooks
   __renderContent: ->
     return View
       style: @styles.content()
-      pointerEvents: @contentEvents
+      pointerEvents: @_contentEvents
       children: @__renderChildren()
 
   __renderBackground: ->
     return View
       style: @styles.background()
-      pointerEvents: @backgroundEvents
+      pointerEvents: @_backgroundEvents
       onStartShouldSetResponder: emptyFunction.thatReturnsTrue
 
 module.exports = type.build()
