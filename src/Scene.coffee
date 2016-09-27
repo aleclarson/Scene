@@ -59,9 +59,10 @@ type.definePrototype
 
   level:
     get: -> @_level
-    set: ->
-      # TODO: Implement scene.level setting
-      throw Error "Unimplemented!"
+    set: (newValue) ->
+      # TODO: Allow setting 'level' when mounted?
+      if @view then throw Error "Cannot set scene level while mounted!"
+      @_level = newValue
 
 type.defineHooks
 
