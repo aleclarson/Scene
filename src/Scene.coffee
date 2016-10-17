@@ -92,8 +92,6 @@ type.defineProps
 
 type.defineNativeValues
 
-  scale: 1
-
   _containerOpacity: ->
     return 0 if @_chain and @_chain.isHidden
     return 0 if @isHidden
@@ -126,7 +124,6 @@ type.defineStyles
   content:
     cover: yes
     clear: yes
-    scale: -> @scale
 
 type.render ->
   return View
