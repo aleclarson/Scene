@@ -94,7 +94,7 @@ type.defineNativeValues
 
   scale: 1
 
-  _opacity: ->
+  _containerOpacity: ->
     return 0 if @_chain and @_chain.isHidden
     return 0 if @isHidden
     return 1
@@ -117,7 +117,7 @@ type.defineStyles
   container:
     cover: yes
     clear: yes
-    opacity: -> @_opacity
+    opacity: -> @_containerOpacity
 
   background:
     cover: yes
