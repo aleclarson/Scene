@@ -34,6 +34,10 @@ type.defineMethods
 
   insert: (scene) ->
 
+    if Array.isArray scene
+      scene.forEach @insert.bind this
+      return
+
     assertType scene, Scene.Kind
 
     if scene.collection is this
