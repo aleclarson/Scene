@@ -3,7 +3,6 @@
 {View} = require "modx/views"
 
 emptyFunction = require "emptyFunction"
-isDev = require "isDev"
 
 type = Type "Scene"
 
@@ -13,11 +12,6 @@ type.defineOptions
   isPermanent: Boolean.withDefault no
   ignoreTouches: Boolean.withDefault no
   ignoreTouchesBelow: Boolean.withDefault no
-
-if isDev
-  global.scenes = Object.create null
-  type.initInstance ->
-    global.scenes[@__name] = this
 
 type.defineReactiveValues (options) ->
 
