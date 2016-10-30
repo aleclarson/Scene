@@ -33,14 +33,9 @@ type.defineGetters
 
   chain: -> @_chain
 
-  isTouchable: ->
-    return no if @ignoreTouches
-    return yes
+  isTouchable: -> not @ignoreTouches
 
-  isTouchableBelow: ->
-    return no if @ignoreTouchesBelow
-    return yes if @ignoreTouches
-    return yes
+  isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
 
 type.definePrototype
 
