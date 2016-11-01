@@ -23,16 +23,18 @@ type.defineValues (options) ->
 
 type.defineGetters
 
-  scenes: ->
+  array: ->
     @_scenes.array
 
-  visibleScenes: ->
-    @scenes.filter (scene) ->
-      not scene.isHidden
+  visible: ->
+    @_scenes.array
+      .filter (scene) ->
+        not scene.isHidden
 
-  hiddenScenes: ->
-    @scenes.filter (scene) ->
-      scene.isHidden
+  hidden: ->
+    @_scenes.array
+      .filter (scene) ->
+        scene.isHidden
 
 type.defineMethods
 
