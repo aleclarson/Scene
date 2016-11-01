@@ -31,11 +31,16 @@ type.defineReactiveValues (options) ->
 
 type.defineGetters
 
-  chain: -> @_chain
+  parent: ->
+    return @_chain._parent if @_chain
+    return @_collection._parent if @_collection
+    return null
 
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
+
+  chain: -> @_chain
 
 type.definePrototype
 
@@ -43,7 +48,7 @@ type.definePrototype
     get: -> @_collection
     set: (newValue) ->
       if newValue is null
-        @_collection.remove this
+      then @_collection.remove this
       else newValue.insert this
 
   level:

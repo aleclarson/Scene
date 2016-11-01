@@ -11,10 +11,13 @@ type = Type "SceneChain"
 type.defineOptions
   isHidden: Boolean.withDefault no
   collection: SceneCollection
+  parent: Scene.Kind
 
 type.defineValues (options) ->
 
   scenes: []
+
+  _parent: options.parent
 
   _collection: options.collection
 
@@ -52,8 +55,8 @@ type.defineMethods
     if scene.chain isnt null
       throw Error "Scenes can only belong to one chain at a time!"
 
-    @last and
-    @last.__onInactive this
+    if @last
+      @last.__onInactive this
 
     scene._chain = this
     scene.__onActive this
@@ -61,8 +64,8 @@ type.defineMethods
     @scenes.push scene
     @last = scene
 
-    @_collection and
-    @_collection.insert scene
+    if @_collection
+      @_collection.insert scene
     return
 
   pop: ->
@@ -74,8 +77,7 @@ type.defineMethods
     scene.__onInactive this
     scene._chain = null
 
-    if not scene.isPermanent
-      @_collection and
+    if @_collection and not scene.isPermanent
       @_collection.remove scene
 
     if length is 1

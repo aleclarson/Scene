@@ -4,18 +4,22 @@
 
 SortedArray = require "sorted-array"
 assertType = require "assertType"
-isType = require "isType"
 sync = require "sync"
 
 Scene = require "./Scene"
 
 type = Type "SceneCollection"
 
-type.defineValues
+type.defineOptions
+  parent: Scene.Kind
 
-  _elements: -> {}
+type.defineValues (options) ->
 
-  _scenes: -> SortedArray.comparing "level"
+  _parent: options.parent
+
+  _elements: {}
+
+  _scenes: SortedArray.comparing "level"
 
 type.defineGetters
 
