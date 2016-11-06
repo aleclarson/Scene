@@ -29,6 +29,30 @@ type.defineReactiveValues (options) ->
 
   _collection: null
 
+type.defineReactions
+
+  _containerOpacity: ->
+    return 0 if @_chain and @_chain.isHidden
+    return 0 if @isHidden
+    return 1
+
+  _containerEvents: ->
+    return "none" if @_chain and @_chain.isHidden
+    return "none" if @isHidden
+    return "box-none"
+
+  _contentEvents: ->
+    return "box-none" if @isTouchable
+    return "none"
+
+  _backgroundEvents: ->
+    return "none" if @isTouchableBelow
+    return "auto"
+
+#
+# Prototype
+#
+
 type.defineGetters
 
   parent: ->
@@ -83,26 +107,6 @@ type.defineStatics
 type.defineProps
   style: Style
   children: Children
-
-type.defineNativeValues
-
-  _containerOpacity: ->
-    return 0 if @_chain and @_chain.isHidden
-    return 0 if @isHidden
-    return 1
-
-  _containerEvents: ->
-    return "none" if @_chain and @_chain.isHidden
-    return "none" if @isHidden
-    return "box-none"
-
-  _contentEvents: ->
-    return "box-none" if @isTouchable
-    return "none"
-
-  _backgroundEvents: ->
-    return "none" if @isTouchableBelow
-    return "auto"
 
 type.defineStyles
 
