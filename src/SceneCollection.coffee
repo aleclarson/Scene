@@ -1,6 +1,7 @@
 
-{Type, Style} = require "modx"
+{Style} = require "react-validators"
 {View} = require "modx/views"
+{Type} = require "modx"
 
 SortedArray = require "sorted-array"
 assertType = require "assertType"

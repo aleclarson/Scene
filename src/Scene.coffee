@@ -1,6 +1,7 @@
 
-{Type, Style, Children} = require "modx"
+{Style, Children} = require "react-validators"
 {View} = require "modx/views"
+{Type} = require "modx"
 
 emptyFunction = require "emptyFunction"
 
