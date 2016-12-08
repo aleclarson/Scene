@@ -1,15 +1,15 @@
 
 {Style} = require "react-validators"
-{View} = require "modx/views"
-{Type} = require "modx"
 
 SortedArray = require "sorted-array"
 assertType = require "assertType"
+ReactType = require "modx/lib/Type"
+View = require "modx/lib/View"
 sync = require "sync"
 
 Scene = require "./Scene"
 
-type = Type "SceneCollection"
+type = ReactType "SceneCollection"
 
 type.defineOptions
   parent: Scene.Kind

@@ -1,11 +1,11 @@
 
 {Style, Children} = require "react-validators"
-{View} = require "modx/views"
-{Type} = require "modx"
 
 emptyFunction = require "emptyFunction"
+ReactType = require "modx/lib/Type"
+View = require "modx/lib/View"
 
-type = Type "Scene"
+type = ReactType "Scene"
 
 type.defineOptions
   level: Number.withDefault 0
