@@ -1,6 +1,3 @@
-###
-@providesModule SceneTree
-###
 
 ReactNativeComponentTree = require "ReactNativeComponentTree"
 ReactNativeTreeTraversal = require "ReactNativeTreeTraversal"

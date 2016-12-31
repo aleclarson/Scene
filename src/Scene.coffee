@@ -10,6 +10,7 @@ SceneTree = require "./SceneTree"
 type = modx.Type "Scene"
 
 type.defineStatics
+  Tree: lazy: -> require "./SceneTree"
   Chain: lazy: -> require "./SceneChain"
   Collection: lazy: -> require "./SceneCollection"
 
