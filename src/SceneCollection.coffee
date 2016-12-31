@@ -1,15 +1,17 @@
 
 {Style} = require "react-validators"
 
+emptyFunction = require "emptyFunction"
 SortedArray = require "sorted-array"
 assertType = require "assertType"
-ReactType = require "modx/lib/Type"
+Event = require "Event"
 View = require "modx/lib/View"
 sync = require "sync"
+modx = require "modx"
 
 Scene = require "./Scene"
 
-type = ReactType "SceneCollection"
+type = modx.Type "SceneCollection"
 
 type.defineOptions
   parent: Scene.Kind
@@ -21,6 +23,8 @@ type.defineValues (options) ->
   _elements: {}
 
   _scenes: SortedArray.comparing "level"
+
+  _didUpdate: Event()
 
 type.defineGetters
 
@@ -39,10 +43,13 @@ type.defineGetters
 
 type.defineMethods
 
-  insert: (scene) ->
+  insert: (scene, onUpdate) ->
+    assertType onUpdate, Function.Maybe
 
     if Array.isArray scene
-      scene.forEach @insert.bind this
+      scene.forEach (scene) => @insert scene
+      if onUpdate
+        @_didUpdate(1, onUpdate).start()
       return
 
     assertType scene, Scene.Kind
@@ -53,11 +60,14 @@ type.defineMethods
     if scene.collection isnt null
       throw Error "Scenes can only belong to one collection at a time!"
 
+    @_scenes.insert scene
     scene._collection = this
     scene.__onInsert this
 
-    @_scenes.insert scene
-    @view and @view.forceUpdate()
+    if onUpdate
+      @_didUpdate(1, onUpdate).start()
+    if @view
+      @view.forceUpdate()
     return
 
   remove: (scene) ->
@@ -98,6 +108,16 @@ type.defineMethods
 
     return results
 
+# Protect against re-renders by the parent.
+type.shouldUpdate ->
+  return no
+
+type.didMount ->
+  @_didUpdate.emit()
+
+type.didUpdate ->
+  @_didUpdate.emit()
+
 #
 # Rendering
 #
@@ -123,7 +143,5 @@ type.render ->
   return View
     style: @props.style
     children: children
-
-type.shouldUpdate -> no
 
 module.exports = type.build()

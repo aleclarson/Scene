@@ -2,10 +2,16 @@
 {Style, Children} = require "react-validators"
 
 emptyFunction = require "emptyFunction"
-ReactType = require "modx/lib/Type"
 View = require "modx/lib/View"
+modx = require "modx"
 
-type = ReactType "Scene"
+SceneTree = require "./SceneTree"
+
+type = modx.Type "Scene"
+
+type.defineStatics
+  Chain: lazy: -> require "./SceneChain"
+  Collection: lazy: -> require "./SceneCollection"
 
 type.defineOptions
   level: Number.withDefault 0
@@ -30,6 +36,11 @@ type.defineReactiveValues (options) ->
 
   _collection: null
 
+type.initInstance (options) ->
+  @chain = options.chain
+  @collection = options.collection
+  return
+
 type.defineReactions
 
   _containerOpacity: ->
@@ -42,7 +53,7 @@ type.defineReactions
     return "none" if @isHidden
     return "box-none"
 
-  _contentEvents: ->
+  _foregroundEvents: ->
     return "box-none" if @isTouchable
     return "none"
 
@@ -65,16 +76,27 @@ type.defineGetters
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
 
-  chain: -> @_chain
-
 type.definePrototype
+
+  chain:
+    get: -> @_chain
+    set: (newValue, oldValue) ->
+      if newValue isnt oldValue
+        oldValue?.remove this
+        if newValue?
+          assertType newValue, Scene.Chain
+          newValue.push this
+      return
 
   collection:
     get: -> @_collection
-    set: (newValue) ->
-      if newValue is null
-      then @_collection.remove this
-      else newValue.insert this
+    set: (newValue, oldValue) ->
+      if newValue isnt oldValue
+        oldValue?.remove this
+        if newValue?
+          assertType newValue, Scene.Collection
+          newValue.insert this
+      return
 
   level:
     get: -> @_level
@@ -93,14 +115,6 @@ type.defineHooks
 
   __onRemove: emptyFunction
 
-type.defineStatics
-
-  Chain: lazy: ->
-    require "./SceneChain"
-
-  Collection: lazy: ->
-    require "./SceneCollection"
-
 #
 # Rendering
 #
@@ -108,6 +122,42 @@ type.defineStatics
 type.defineProps
   style: Style
   children: Children
+
+type.didMount ->
+  SceneTree._addScene this
+
+type.willUnmount ->
+  SceneTree._removeScene this
+
+type.render ->
+  return View
+    style: @styles.container()
+    pointerEvents: @_containerEvents
+    children: [
+      @_renderBackground()
+      @_renderForeground()
+    ]
+
+type.defineMethods
+
+  _renderBackground: ->
+    return View
+      style: @styles.background()
+      pointerEvents: @_backgroundEvents
+      onStartShouldSetResponder: emptyFunction.thatReturnsTrue
+      children: @__renderBackground()
+
+  _renderForeground: ->
+    return View
+      style: @styles.foreground()
+      pointerEvents: @_foregroundEvents
+      children: @__renderForeground()
+
+type.defineHooks
+
+  __renderForeground: -> @props.children
+
+  __renderBackground: emptyFunction
 
 type.defineStyles
 
@@ -120,34 +170,8 @@ type.defineStyles
     cover: yes
     clear: yes
 
-  content:
+  foreground:
     cover: yes
     clear: yes
 
-type.render ->
-  return View
-    style: @styles.container()
-    pointerEvents: @_containerEvents
-    children: [
-      @__renderBackground()
-      @__renderContent()
-    ]
-
-type.defineHooks
-
-  __renderChildren: ->
-    @props.children
-
-  __renderContent: ->
-    return View
-      style: @styles.content()
-      pointerEvents: @_contentEvents
-      children: @__renderChildren()
-
-  __renderBackground: ->
-    return View
-      style: @styles.background()
-      pointerEvents: @_backgroundEvents
-      onStartShouldSetResponder: emptyFunction.thatReturnsTrue
-
-module.exports = type.build()
+module.exports = Scene = type.build()

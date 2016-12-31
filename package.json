@@ -13,7 +13,7 @@
     "Type": "aleclarson/Type#2.1.0",
     "assertType": "aleclarson/assertType#2.0.1",
     "emptyFunction": "aleclarson/emptyFunction#1.0.0",
-    "modx": "aleclarson/modx#2.1.0",
+    "modx": "aleclarson/modx#2.3.0",
     "react-validators": "aleclarson/react-validators#1.0.1",
     "sorted-array": "aleclarson/sorted-array#2.0.1",
     "sync": "aleclarson/sync#1.0.1"
