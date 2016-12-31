@@ -2,6 +2,7 @@
 {Style, Children} = require "react-validators"
 
 emptyFunction = require "emptyFunction"
+Event = require "Event"
 View = require "modx/lib/View"
 modx = require "modx"
 
@@ -21,6 +22,12 @@ type.defineOptions
   ignoreTouches: Boolean.withDefault no
   ignoreTouchesBelow: Boolean.withDefault no
 
+type.defineFrozenValues ->
+
+  didMount: Event()
+
+  didUpdate: Event()
+
 type.defineReactiveValues (options) ->
 
   isHidden: options.isHidden
@@ -32,6 +39,8 @@ type.defineReactiveValues (options) ->
   ignoreTouchesBelow: options.ignoreTouchesBelow
 
   _level: options.level
+
+  _isMounted: no
 
   _chain: null
 
@@ -73,6 +82,8 @@ type.defineGetters
     return @_collection._parent if @_collection
     return null
 
+  isMounted: -> @_isMounted
+
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
@@ -106,6 +117,17 @@ type.definePrototype
       if @view then throw Error "Cannot set scene level while mounted!"
       @_level = newValue
 
+type.defineMethods
+
+  onceMounted: (callback) ->
+
+    if @_isMounted
+      callback()
+      return
+
+    listener = @didMount 1, callback
+    return listener.start()
+
 type.defineHooks
 
   __onInsert: emptyFunction
@@ -126,9 +148,15 @@ type.defineProps
 
 type.didMount ->
   SceneTree._addScene this
+  @_isMounted = yes
+  @didMount.emit()
 
 type.willUnmount ->
   SceneTree._removeScene this
+  @_isMounted = no
+
+type.didUpdate ->
+  @didUpdate.emit()
 
 type.render ->
   return View
