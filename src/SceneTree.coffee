@@ -19,8 +19,8 @@ type.defineMethods
     inst = getNativeInstance view
     while inst
       tag = ReactNativeComponentTree.getNodeFromInstance inst
-      if scene = @_tree[tag]
-        return scene if filter scene
+      scene = @_tree[tag]
+      return scene if scene and filter scene
       inst = ReactNativeTreeTraversal.getParentInstance inst
     return null
 

@@ -132,6 +132,16 @@ type.defineHooks
 
   __onRemove: emptyFunction
 
+type.didMount ->
+  SceneTree._addScene this
+  @didMount.emit()
+
+type.didUpdate ->
+  @didUpdate.emit()
+
+type.willUnmount ->
+  SceneTree._removeScene this
+
 #
 # Rendering
 #
@@ -139,16 +149,6 @@ type.defineHooks
 type.defineProps
   style: Style
   children: Children
-
-type.didMount ->
-  SceneTree._addScene this
-  @didMount.emit()
-
-type.willUnmount ->
-  SceneTree._removeScene this
-
-type.didUpdate ->
-  @didUpdate.emit()
 
 type.render ->
   return View
