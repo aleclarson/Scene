@@ -45,11 +45,6 @@ type.defineReactiveValues (options) ->
 
   _collection: null
 
-type.initInstance (options) ->
-  @chain = options.chain
-  @collection = options.collection
-  return
-
 type.defineReactions
 
   _containerOpacity: ->
