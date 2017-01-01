@@ -1,6 +1,7 @@
 
 {Style, Children} = require "react-validators"
 
+ReactUpdateQueue = require "ReactUpdateQueue"
 emptyFunction = require "emptyFunction"
 Event = require "Event"
 View = require "modx/lib/View"
@@ -39,8 +40,6 @@ type.defineReactiveValues (options) ->
   ignoreTouchesBelow: options.ignoreTouchesBelow
 
   _level: options.level
-
-  _isMounted: no
 
   _chain: null
 
@@ -82,8 +81,6 @@ type.defineGetters
     return @_collection._parent if @_collection
     return null
 
-  isMounted: -> @_isMounted
-
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
@@ -121,7 +118,7 @@ type.defineMethods
 
   onceMounted: (callback) ->
 
-    if @_isMounted
+    if @view and ReactUpdateQueue.isMounted @view
       callback()
       return
 
@@ -148,12 +145,10 @@ type.defineProps
 
 type.didMount ->
   SceneTree._addScene this
-  @_isMounted = yes
   @didMount.emit()
 
 type.willUnmount ->
   SceneTree._removeScene this
-  @_isMounted = no
 
 type.didUpdate ->
   @didUpdate.emit()

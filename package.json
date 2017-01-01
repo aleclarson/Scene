@@ -23,6 +23,7 @@
     "ReactComponent",
     "ReactInstanceMap",
     "ReactNativeComponentTree",
-    "ReactNativeTreeTraversal"
+    "ReactNativeTreeTraversal",
+    "ReactUpdateQueue"
   ]
 }
