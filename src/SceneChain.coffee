@@ -3,9 +3,13 @@ assertType = require "assertType"
 Type = require "Type"
 sync = require "sync"
 
+SceneTree = require "./SceneTree"
 Scene = require "./Scene"
 
 type = Type "SceneChain"
+
+type.defineStatics
+  find: (view) -> SceneTree.findChain view
 
 type.defineOptions
   isHidden: Boolean.withDefault no

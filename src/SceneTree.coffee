@@ -24,12 +24,12 @@ type.defineMethods
       inst = ReactNativeTreeTraversal.getParentInstance inst
     return null
 
-  findSceneChain: (view) ->
+  findChain: (view) ->
     if scene = @findScene view, belongsToChain
     then scene.chain
     else null
 
-  findSceneCollection: (view) ->
+  findCollection: (view) ->
     if scene = @findScene view, belongsToCollection
     then scene.collection
     else null

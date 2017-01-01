@@ -9,9 +9,13 @@ View = require "modx/lib/View"
 sync = require "sync"
 modx = require "modx"
 
+SceneTree = require "./SceneTree"
 Scene = require "./Scene"
 
 type = modx.Type "SceneCollection"
+
+type.defineStatics
+  find: (view) -> SceneTree.findCollection view
 
 type.defineOptions
   parent: Scene.Kind
