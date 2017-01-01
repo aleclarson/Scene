@@ -16,7 +16,7 @@ type.defineMethods
 
   findScene: (view, filter = emptyFunction.thatReturnsTrue) ->
     assertView view
-    inst = ReactInstanceMap.get view
+    inst = getNativeInstance view
     while inst
       tag = ReactNativeComponentTree.getNodeFromInstance inst
       if scene = @_tree[tag]
@@ -35,16 +35,23 @@ type.defineMethods
     else null
 
   _addScene: (scene) ->
-    throw Error "Scene must be mounted!" unless scene.view
-    inst = ReactInstanceMap.get scene.view
-    tag = ReactNativeComponentTree.getNodeFromInstance inst
-    @_tree[tag] = scene
-    return
+
+    unless scene.view
+      throw Error "Scene must be mounted!"
+
+    tag = getNativeTag scene.view
+    unless @_tree[tag]
+      @_tree[tag] = scene
+      return
+
+    throw Error "Scene with tag '#{tag}' already exists!"
 
   _removeScene: (scene) ->
-    throw Error "Scene must be mounted!" unless scene.view
-    inst = ReactInstanceMap.get scene.view
-    tag = ReactNativeComponentTree.getNodeFromInstance inst
+
+    unless scene.view
+      throw Error "Scene must be mounted!"
+
+    tag = getNativeTag scene.view
     delete @_tree[tag]
 
 module.exports = type.construct()
@@ -62,3 +69,12 @@ belongsToChain = (scene) ->
 
 belongsToCollection = (scene) ->
   scene.collection isnt null
+
+getNativeInstance = (view) ->
+  inst = ReactInstanceMap.get view
+  inst = next while next = inst._renderedComponent
+  return inst
+
+getNativeTag = (view) ->
+  inst = getNativeInstance view
+  return ReactNativeComponentTree.getNodeFromInstance inst
