@@ -1,66 +1,88 @@
 
-{ Component, Style, View } = require "component"
+{Style} = require "react-validators"
 
 SortedArray = require "sorted-array"
 assertType = require "assertType"
-isType = require "isType"
-assert = require "assert"
+ReactType = require "modx/lib/Type"
+View = require "modx/lib/View"
 sync = require "sync"
 
 Scene = require "./Scene"
 
-type = Component.Type "SceneCollection"
+type = ReactType "SceneCollection"
 
-type.defineValues
+type.defineOptions
+  parent: Scene.Kind
 
-  _elements: -> {}
+type.defineValues (options) ->
 
-  _scenes: -> SortedArray.comparing "level"
+  _parent: options.parent
 
-type.definePrototype
+  _elements: {}
 
-  scenes: get: ->
+  _scenes: SortedArray.comparing "level"
+
+type.defineGetters
+
+  array: ->
     @_scenes.array
 
-  visibleScenes: get: ->
-    @scenes.filter (scene) ->
-      not scene.isHidden
+  visible: ->
+    @_scenes.array
+      .filter (scene) ->
+        not scene.isHidden
 
-  hiddenScenes: get: ->
-    @scenes.filter (scene) ->
-      scene.isHidden
+  hidden: ->
+    @_scenes.array
+      .filter (scene) ->
+        scene.isHidden
 
 type.defineMethods
 
   insert: (scene) ->
 
+    if Array.isArray scene
+      scene.forEach @insert.bind this
+      return
+
     assertType scene, Scene.Kind
-    assert scene.collection is null, "Scenes can only belong to one collection at a time!"
+
+    if scene.collection is this
+      return # Already in this collection!
+
+    if scene.collection isnt null
+      throw Error "Scenes can only belong to one collection at a time!"
 
     scene._collection = this
     scene.__onInsert this
 
     @_scenes.insert scene
-    @view.forceUpdate() if @view
+    @view and @view.forceUpdate()
     return
 
   remove: (scene) ->
 
     assertType scene, Scene.Kind
-    assert scene.collection is this, "Scene does not belong to this collection!"
+
+    if scene.collection isnt this
+      throw Error "Scene does not belong to this collection!"
 
     scene.__onRemove this
     scene._collection = null
 
-    @_scenes.remove scene
+    index = @_scenes.array.indexOf scene
+    @_scenes.array.splice index, 1
+
     delete @_elements[scene.__name]
-    @view.forceUpdate() if @view
+    @view and @view.forceUpdate()
     return
 
   searchBelow: (scene, filter) ->
 
     assertType scene, Scene.Kind
-    assert scene.collection is this, "Scene does not belong to this collection!"
+
+    if scene.collection isnt this
+      throw Error "Scene does not belong to this collection!"
 
     filter ?= emptyFunction.thatReturnsTrue
 
@@ -80,22 +102,28 @@ type.defineMethods
 # Rendering
 #
 
-type.propTypes =
+type.defineProps
   style: Style
-
-type.shouldUpdate ->
-  return no
 
 type.render ->
 
-  cache = @_elements
+  keys = [] if isDev
+  elements = @_elements
   children = sync.map @_scenes.array, (scene) ->
     key = scene.__name
-    return cache[key] if cache[key]
-    cache[key] = scene.render { key }
+
+    if isDev
+      if 0 <= keys.indexOf key
+        throw Error "Duplicate scene name: '#{key}'"
+      keys.push key
+
+    elements[key] or
+    elements[key] = scene.render {key}
 
   return View
     style: @props.style
     children: children
+
+type.shouldUpdate -> no
 
 module.exports = type.build()

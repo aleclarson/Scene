@@ -1,79 +1,89 @@
 
-require "isDev"
-
-{ Component, Style, Children, View } = require "component"
+{Style, Children} = require "react-validators"
 
 emptyFunction = require "emptyFunction"
-fromArgs = require "fromArgs"
+ReactType = require "modx/lib/Type"
+View = require "modx/lib/View"
 
-type = Component.Type "Scene"
+type = ReactType "Scene"
 
 type.defineOptions
+  level: Number.withDefault 0
+  isHidden: Boolean.withDefault no
+  isPermanent: Boolean.withDefault no
+  ignoreTouches: Boolean.withDefault no
+  ignoreTouchesBelow: Boolean.withDefault no
 
-  level:
-    type: Number
-    default: 0
+type.defineReactiveValues (options) ->
 
-  isHidden:
-    type: Boolean
-    default: yes
+  isHidden: options.isHidden
 
-  ignoreTouches:
-    type: Boolean
-    default: no
+  isPermanent: options.isPermanent
 
-  ignoreTouchesBelow:
-    type: Boolean
-    default: no
+  ignoreTouches: options.ignoreTouches
 
-if isDev
-  global.scenes = Object.create null
-  type.initInstance ->
-    global.scenes[@__name] = this
+  ignoreTouchesBelow: options.ignoreTouchesBelow
 
-type.defineReactiveValues
-
-  isHidden: fromArgs "isHidden"
-
-  ignoreTouches: fromArgs "ignoreTouches"
-
-  ignoreTouchesBelow: fromArgs "ignoreTouchesBelow"
-
-  _level: fromArgs "level"
-
-type.defineValues
+  _level: options.level
 
   _chain: null
 
   _collection: null
 
-type.exposeGetters [
-  "chain"
-  "collection"
-]
+type.defineReactions
+
+  _containerOpacity: ->
+    return 0 if @_chain and @_chain.isHidden
+    return 0 if @isHidden
+    return 1
+
+  _containerEvents: ->
+    return "none" if @_chain and @_chain.isHidden
+    return "none" if @isHidden
+    return "box-none"
+
+  _contentEvents: ->
+    return "box-none" if @isTouchable
+    return "none"
+
+  _backgroundEvents: ->
+    return "none" if @isTouchableBelow
+    return "auto"
+
+#
+# Prototype
+#
+
+type.defineGetters
+
+  parent: ->
+    return @_chain._parent if @_chain
+    return @_collection._parent if @_collection
+    return null
+
+  isTouchable: -> not @ignoreTouches
+
+  isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
+
+  chain: -> @_chain
 
 type.definePrototype
 
+  collection:
+    get: -> @_collection
+    set: (newValue) ->
+      if newValue is null
+      then @_collection.remove this
+      else newValue.insert this
+
   level:
     get: -> @_level
-    set: ->
-      # TODO: Implement scene.level setting
-      throw Error "Unimplemented!"
+    set: (newValue) ->
+      # TODO: Allow setting 'level' when mounted?
+      if @view then throw Error "Cannot set scene level while mounted!"
+      @_level = newValue
 
-  isActive: get: ->
-    return no unless @_chain
-    return this is @_chain.last
-
-  isTouchable: get: ->
-    return no if @ignoreTouches
-    return yes
-
-  isTouchableBelow: get: ->
-    return no if @ignoreTouchesBelow
-    return yes if @ignoreTouches
-    return yes
-
-type.defineMethods
+type.defineHooks
 
   __onInsert: emptyFunction
 
@@ -95,32 +105,16 @@ type.defineStatics
 # Rendering
 #
 
-type.propTypes =
+type.defineProps
   style: Style
   children: Children
-
-type.defineNativeValues
-
-  scale: 1
-
-  opacity: -> =>
-    if @isHidden then 0 else 1
-
-  containerEvents: -> =>
-    if @isHidden then "none" else "box-none"
-
-  contentEvents: -> =>
-    if @isTouchable then "box-none" else "none"
-
-  backgroundEvents: -> =>
-    if @isTouchableBelow then "none" else "auto"
 
 type.defineStyles
 
   container:
     cover: yes
     clear: yes
-    opacity: -> @opacity
+    opacity: -> @_containerOpacity
 
   background:
     cover: yes
@@ -129,35 +123,31 @@ type.defineStyles
   content:
     cover: yes
     clear: yes
-    scale: -> @scale
 
 type.render ->
   return View
     style: @styles.container()
-    pointerEvents: @containerEvents
+    pointerEvents: @_containerEvents
     children: [
       @__renderBackground()
       @__renderContent()
     ]
 
-type.defineMethods
+type.defineHooks
 
   __renderChildren: ->
     @props.children
 
   __renderContent: ->
     return View
+      style: @styles.content()
+      pointerEvents: @_contentEvents
       children: @__renderChildren()
-      pointerEvents: @contentEvents
-      style: [
-        @styles.content()
-        @props.style
-      ]
 
   __renderBackground: ->
     return View
       style: @styles.background()
-      pointerEvents: @backgroundEvents
+      pointerEvents: @_backgroundEvents
       onStartShouldSetResponder: emptyFunction.thatReturnsTrue
 
 module.exports = type.build()
