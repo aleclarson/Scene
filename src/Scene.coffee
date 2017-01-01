@@ -85,6 +85,8 @@ type.definePrototype
   chain:
     get: -> @_chain
     set: (newValue, oldValue) ->
+      if newValue is undefined
+        newValue = null
       if newValue isnt oldValue
         oldValue?.remove this
         if newValue?
