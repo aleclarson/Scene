@@ -3,48 +3,35 @@ assertType = require "assertType"
 Type = require "Type"
 sync = require "sync"
 
-SceneCollection = require "./SceneCollection"
+SceneTree = require "./SceneTree"
 Scene = require "./Scene"
 
 type = Type "SceneChain"
 
+type.defineStatics
+  find: (view) -> SceneTree.findChain view
+
 type.defineOptions
   isHidden: Boolean.withDefault no
-  collection: SceneCollection
   parent: Scene.Kind
 
 type.defineValues (options) ->
 
-  scenes: []
+  _scenes: []
 
   _parent: options.parent
-
-  _collection: options.collection
 
 type.defineReactiveValues (options) ->
 
   isHidden: options.isHidden
 
-  last: null
+  _last: null
 
-type.definePrototype
+type.defineGetters
 
-  collection:
-    get: -> @_collection
-    set: (newValue, oldValue) ->
-      @_collection = newValue
-      if newValue
-        if oldValue
-          sync.each @scenes, (scene) ->
-            oldValue.remove scene
-            newValue.insert scene
-        else
-          sync.each @scenes, (scene) ->
-            newValue.insert scene
-      else if oldValue
-        sync.each @scenes, (scene) ->
-          oldValue.remove scene
-      return
+  last: -> @_last
+
+  scenes: -> @_scenes
 
 type.defineMethods
 
@@ -55,37 +42,45 @@ type.defineMethods
     if scene.chain isnt null
       throw Error "Scenes can only belong to one chain at a time!"
 
-    if @last
-      @last.__onInactive this
+    if @_last
+      @_last.__onInactive this
 
     scene._chain = this
     scene.__onActive this
 
-    @scenes.push scene
-    @last = scene
-
-    if @_collection
-      @_collection.insert scene
+    @_scenes.push scene
+    @_last = scene
     return
 
   pop: ->
 
-    { length } = @scenes
-    return if length is 0
+    sceneCount = @_scenes.length
+    return if sceneCount is 0
 
-    scene = @scenes.pop()
+    scene = @_scenes.pop()
     scene.__onInactive this
     scene._chain = null
 
-    if @_collection and not scene.isPermanent
-      @_collection.remove scene
-
-    if length is 1
-      @last = null
+    if sceneCount is 1
+      @_last = null
       return
 
-    @last = @scenes[length - 2]
-    @last.__onActive this
+    @_last = @_scenes[sceneCount - 2]
+    @_last.__onActive this
+    return
+
+  remove: (scene) ->
+
+    assertType scene, Scene.Kind
+
+    if scene is @_last
+      return @pop()
+
+    index = @_scenes.indexOf scene
+    @_scenes.splice index, 1
+
+    scene.__onInactive this
+    scene._chain = null
     return
 
 module.exports = type.build()
