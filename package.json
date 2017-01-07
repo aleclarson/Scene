@@ -1,6 +1,6 @@
 {
   "name": "Scene",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "js/Scene",
   "plugins": [
     "lotus-coffee"

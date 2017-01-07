@@ -58,8 +58,8 @@ type.defineMethods
     return if sceneCount is 0
 
     scene = @_scenes.pop()
-    scene.__onInactive this
     scene._chain = null
+    scene.__onInactive this
 
     if sceneCount is 1
       @_last = null
@@ -79,8 +79,8 @@ type.defineMethods
     index = @_scenes.indexOf scene
     @_scenes.splice index, 1
 
-    scene.__onInactive this
     scene._chain = null
+    scene.__onInactive this
     return
 
 module.exports = type.build()
