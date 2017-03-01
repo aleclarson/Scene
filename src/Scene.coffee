@@ -76,33 +76,15 @@ type.defineGetters
     return @_collection._parent if @_collection
     return null
 
+  chain: -> @_chain
+
+  collection: -> @_collection
+
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
 
 type.definePrototype
-
-  chain:
-    get: -> @_chain
-    set: (newValue, oldValue) ->
-      if newValue is undefined
-        newValue = null
-      if newValue isnt oldValue
-        oldValue?.remove this
-        if newValue?
-          assertType newValue, Scene.Chain
-          newValue.push this
-      return
-
-  collection:
-    get: -> @_collection
-    set: (newValue, oldValue) ->
-      if newValue isnt oldValue
-        oldValue?.remove this
-        if newValue?
-          assertType newValue, Scene.Collection
-          newValue.insert this
-      return
 
   level:
     get: -> @_level
