@@ -18,8 +18,6 @@ type.defineValues (options) ->
 
   _scenes: []
 
-  _parent: options.parent
-
 type.defineReactiveValues (options) ->
 
   isHidden: options.isHidden is yes

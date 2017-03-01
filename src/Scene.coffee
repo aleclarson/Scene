@@ -71,11 +71,6 @@ type.defineReactions
 
 type.defineGetters
 
-  parent: ->
-    return @_chain._parent if @_chain
-    return @_collection._parent if @_collection
-    return null
-
   chain: -> @_chain
 
   collection: -> @_collection

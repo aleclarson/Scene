@@ -17,12 +17,7 @@ type = modx.Type "SceneCollection"
 type.defineStatics
   find: (view) -> SceneTree.findCollection view
 
-type.defineOptions
-  parent: Scene.Kind
-
 type.defineValues (options) ->
-
-  _parent: options.parent
 
   _elements: {}
 
