@@ -1,7 +1,6 @@
 
 assertType = require "assertType"
 Type = require "Type"
-sync = require "sync"
 
 SceneTree = require "./SceneTree"
 Scene = require "./Scene"

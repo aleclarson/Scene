@@ -6,7 +6,6 @@ SortedArray = require "SortedArray"
 assertType = require "assertType"
 Event = require "eve"
 View = require "modx/lib/View"
-sync = require "sync"
 modx = require "modx"
 
 SceneTree = require "./SceneTree"
@@ -127,7 +126,7 @@ type.render ->
 
   keys = [] if isDev
   elements = @_elements
-  children = sync.map @_scenes.array, (scene) ->
+  children = @_scenes.array.map (scene) ->
     key = scene.__name
 
     if isDev
