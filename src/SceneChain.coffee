@@ -14,15 +14,9 @@ type.defineStatics
 type.defineArgs
   isHidden: Boolean
 
-type.defineValues (options) ->
-
-  _scenes: []
-
 type.defineReactiveValues (options) ->
 
   isHidden: options.isHidden is yes
-
-  _last: null
 
 type.defineGetters
 
@@ -79,5 +73,17 @@ type.defineMethods
     scene._chain = null
     scene.__onInactive this
     return
+
+#
+# Internals
+#
+
+type.defineValues ->
+
+  _scenes: []
+
+type.defineReactiveValues
+
+  _last: null
 
 module.exports = type.build()
