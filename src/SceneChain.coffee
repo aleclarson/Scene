@@ -69,20 +69,6 @@ type.defineMethods
     @_last.__onActive()
     return
 
-  remove: (scene) ->
-
-    assertType scene, Scene.Kind
-
-    if scene is @_last
-      return @pop()
-
-    index = @_scenes.indexOf scene
-    @_scenes.splice index, 1
-
-    scene._chain = null
-    scene.__onInactive this
-    return
-
 #
 # Internals
 #
