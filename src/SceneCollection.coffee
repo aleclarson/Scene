@@ -2,7 +2,7 @@
 {Style} = require "react-validators"
 
 emptyFunction = require "emptyFunction"
-SortedArray = require "sorted-array"
+SortedArray = require "SortedArray"
 assertType = require "assertType"
 Event = require "eve"
 View = require "modx/lib/View"
