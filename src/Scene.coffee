@@ -15,6 +15,7 @@ type.defineStatics
   find: (view) -> SceneTree.findScene view
   Chain: lazy: -> require "./SceneChain"
   Collection: lazy: -> require "./SceneCollection"
+  Router: lazy: -> require "./SceneRouter"
 
 type.defineArgs
   level: Number
