@@ -16,12 +16,12 @@ type.defineStatics
   Chain: lazy: -> require "./SceneChain"
   Collection: lazy: -> require "./SceneCollection"
 
-type.defineOptions
-  level: Number.withDefault 0
-  isHidden: Boolean.withDefault no
-  isPermanent: Boolean.withDefault no
-  ignoreTouches: Boolean.withDefault no
-  ignoreTouchesBelow: Boolean.withDefault no
+type.defineArgs
+  level: Number
+  isHidden: Boolean
+  isPermanent: Boolean
+  ignoreTouches: Boolean
+  ignoreTouchesBelow: Boolean
 
 type.defineFrozenValues ->
 
@@ -31,15 +31,15 @@ type.defineFrozenValues ->
 
 type.defineReactiveValues (options) ->
 
-  isHidden: options.isHidden
+  isHidden: options.isHidden is yes
 
-  isPermanent: options.isPermanent
+  isPermanent: options.isPermanent is yes
 
-  ignoreTouches: options.ignoreTouches
+  ignoreTouches: options.ignoreTouches is yes
 
-  ignoreTouchesBelow: options.ignoreTouchesBelow
+  ignoreTouchesBelow: options.ignoreTouchesBelow is yes
 
-  _level: options.level
+  _level: options.level ? 0
 
   _chain: null
 

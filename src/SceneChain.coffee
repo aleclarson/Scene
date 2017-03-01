@@ -11,9 +11,8 @@ type = Type "SceneChain"
 type.defineStatics
   find: (view) -> SceneTree.findChain view
 
-type.defineOptions
-  isHidden: Boolean.withDefault no
-  parent: Scene.Kind
+type.defineArgs
+  isHidden: Boolean
 
 type.defineValues (options) ->
 
@@ -23,7 +22,7 @@ type.defineValues (options) ->
 
 type.defineReactiveValues (options) ->
 
-  isHidden: options.isHidden
+  isHidden: options.isHidden is yes
 
   _last: null
 
