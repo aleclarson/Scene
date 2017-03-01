@@ -2,11 +2,10 @@
 {Style} = require "react-validators"
 
 emptyFunction = require "emptyFunction"
-SortedArray = require "sorted-array"
+SortedArray = require "SortedArray"
 assertType = require "assertType"
-Event = require "Event"
+Event = require "eve"
 View = require "modx/lib/View"
-sync = require "sync"
 modx = require "modx"
 
 SceneTree = require "./SceneTree"
@@ -17,12 +16,7 @@ type = modx.Type "SceneCollection"
 type.defineStatics
   find: (view) -> SceneTree.findCollection view
 
-type.defineOptions
-  parent: Scene.Kind
-
 type.defineValues (options) ->
-
-  _parent: options.parent
 
   _elements: {}
 
@@ -52,8 +46,7 @@ type.defineMethods
 
     if Array.isArray scene
       scene.forEach (scene) => @insert scene
-      if onUpdate
-        @_didUpdate(1, onUpdate).start()
+      @_didUpdate.once onUpdate if onUpdate
       return
 
     assertType scene, Scene.Kind
@@ -133,7 +126,7 @@ type.render ->
 
   keys = [] if isDev
   elements = @_elements
-  children = sync.map @_scenes.array, (scene) ->
+  children = @_scenes.array.map (scene) ->
     key = scene.__name
 
     if isDev

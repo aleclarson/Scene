@@ -3,7 +3,7 @@
 
 ReactUpdateQueue = require "ReactUpdateQueue"
 emptyFunction = require "emptyFunction"
-Event = require "Event"
+Event = require "eve"
 View = require "modx/lib/View"
 modx = require "modx"
 
@@ -15,13 +15,14 @@ type.defineStatics
   find: (view) -> SceneTree.findScene view
   Chain: lazy: -> require "./SceneChain"
   Collection: lazy: -> require "./SceneCollection"
+  Router: lazy: -> require "./SceneRouter"
 
-type.defineOptions
-  level: Number.withDefault 0
-  isHidden: Boolean.withDefault no
-  isPermanent: Boolean.withDefault no
-  ignoreTouches: Boolean.withDefault no
-  ignoreTouchesBelow: Boolean.withDefault no
+type.defineArgs
+  level: Number
+  isHidden: Boolean
+  isPermanent: Boolean
+  ignoreTouches: Boolean
+  ignoreTouchesBelow: Boolean
 
 type.defineFrozenValues ->
 
@@ -31,15 +32,15 @@ type.defineFrozenValues ->
 
 type.defineReactiveValues (options) ->
 
-  isHidden: options.isHidden
+  isHidden: options.isHidden is yes
 
-  isPermanent: options.isPermanent
+  isPermanent: options.isPermanent is yes
 
-  ignoreTouches: options.ignoreTouches
+  ignoreTouches: options.ignoreTouches is yes
 
-  ignoreTouchesBelow: options.ignoreTouchesBelow
+  ignoreTouchesBelow: options.ignoreTouchesBelow is yes
 
-  _level: options.level
+  _level: options.level ? 0
 
   _chain: null
 
@@ -71,38 +72,15 @@ type.defineReactions
 
 type.defineGetters
 
-  parent: ->
-    return @_chain._parent if @_chain
-    return @_collection._parent if @_collection
-    return null
+  chain: -> @_chain
+
+  collection: -> @_collection
 
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
 
 type.definePrototype
-
-  chain:
-    get: -> @_chain
-    set: (newValue, oldValue) ->
-      if newValue is undefined
-        newValue = null
-      if newValue isnt oldValue
-        oldValue?.remove this
-        if newValue?
-          assertType newValue, Scene.Chain
-          newValue.push this
-      return
-
-  collection:
-    get: -> @_collection
-    set: (newValue, oldValue) ->
-      if newValue isnt oldValue
-        oldValue?.remove this
-        if newValue?
-          assertType newValue, Scene.Collection
-          newValue.insert this
-      return
 
   level:
     get: -> @_level
@@ -114,13 +92,9 @@ type.definePrototype
 type.defineMethods
 
   onceMounted: (callback) ->
-
     if @view and ReactUpdateQueue.isMounted @view
-      callback()
-      return
-
-    listener = @didMount 1, callback
-    return listener.start()
+    then callback()
+    else @didMount.once callback
 
 type.defineHooks
 

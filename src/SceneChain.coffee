@@ -1,7 +1,6 @@
 
 assertType = require "assertType"
 Type = require "Type"
-sync = require "sync"
 
 SceneTree = require "./SceneTree"
 Scene = require "./Scene"
@@ -11,23 +10,16 @@ type = Type "SceneChain"
 type.defineStatics
   find: (view) -> SceneTree.findChain view
 
-type.defineOptions
-  isHidden: Boolean.withDefault no
-  parent: Scene.Kind
-
-type.defineValues (options) ->
-
-  _scenes: []
-
-  _parent: options.parent
+type.defineArgs
+  isHidden: Boolean
 
 type.defineReactiveValues (options) ->
 
-  isHidden: options.isHidden
-
-  _last: null
+  isHidden: options.isHidden is yes
 
 type.defineGetters
+
+  path: -> @_path
 
   last: -> @_last
 
@@ -35,18 +27,22 @@ type.defineGetters
 
 type.defineMethods
 
-  push: (scene) ->
-
+  push: (scene, path) ->
     assertType scene, Scene.Kind
+    assertType path, String.Maybe
 
     if scene.chain isnt null
       throw Error "Scenes can only belong to one chain at a time!"
 
-    if @_last
-      @_last.__onInactive this
+    if @_last isnt null
+      @_last.__onInactive()
 
     scene._chain = this
-    scene.__onActive this
+    scene.__onActive()
+
+    if path
+      @_paths.push path
+      @_path = path
 
     @_scenes.push scene
     @_last = scene
@@ -58,29 +54,35 @@ type.defineMethods
     return if sceneCount is 0
 
     scene = @_scenes.pop()
+    scene.__onInactive()
     scene._chain = null
-    scene.__onInactive this
 
     if sceneCount is 1
       @_last = null
       return
 
+    if @_paths.length
+      @_paths.pop()
+      @_path = @_paths[sceneCount - 2]
+
     @_last = @_scenes[sceneCount - 2]
-    @_last.__onActive this
+    @_last.__onActive()
     return
 
-  remove: (scene) ->
+#
+# Internals
+#
 
-    assertType scene, Scene.Kind
+type.defineValues ->
 
-    if scene is @_last
-      return @pop()
+  _paths: []
 
-    index = @_scenes.indexOf scene
-    @_scenes.splice index, 1
+  _scenes: []
 
-    scene._chain = null
-    scene.__onInactive this
-    return
+type.defineReactiveValues
+
+  _path: null
+
+  _last: null
 
 module.exports = type.build()
