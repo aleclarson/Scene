@@ -20,15 +20,17 @@ type.defineReactiveValues (options) ->
 
 type.defineGetters
 
+  path: -> @_path
+
   last: -> @_last
 
   scenes: -> @_scenes
 
 type.defineMethods
 
-  push: (scene) ->
-
+  push: (scene, path) ->
     assertType scene, Scene.Kind
+    assertType path, String.Maybe
 
     if scene.chain isnt null
       throw Error "Scenes can only belong to one chain at a time!"
@@ -38,6 +40,10 @@ type.defineMethods
 
     scene._chain = this
     scene.__onActive this
+
+    if path
+      @_paths.push path
+      @_path = path
 
     @_scenes.push scene
     @_last = scene
@@ -55,6 +61,10 @@ type.defineMethods
     if sceneCount is 1
       @_last = null
       return
+
+    if @_paths.length
+      @_paths.pop()
+      @_path = @_paths[sceneCount - 2]
 
     @_last = @_scenes[sceneCount - 2]
     @_last.__onActive this
@@ -80,9 +90,13 @@ type.defineMethods
 
 type.defineValues ->
 
+  _paths: []
+
   _scenes: []
 
 type.defineReactiveValues
+
+  _path: null
 
   _last: null
 
