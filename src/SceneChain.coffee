@@ -34,11 +34,11 @@ type.defineMethods
     if scene.chain isnt null
       throw Error "Scenes can only belong to one chain at a time!"
 
-    if @_last
-      @_last.__onInactive this
+    if @_last isnt null
+      @_last.__onInactive()
 
     scene._chain = this
-    scene.__onActive this
+    scene.__onActive()
 
     if path
       @_paths.push path
@@ -54,8 +54,8 @@ type.defineMethods
     return if sceneCount is 0
 
     scene = @_scenes.pop()
+    scene.__onInactive()
     scene._chain = null
-    scene.__onInactive this
 
     if sceneCount is 1
       @_last = null
@@ -66,7 +66,7 @@ type.defineMethods
       @_path = @_paths[sceneCount - 2]
 
     @_last = @_scenes[sceneCount - 2]
-    @_last.__onActive this
+    @_last.__onActive()
     return
 
   remove: (scene) ->
