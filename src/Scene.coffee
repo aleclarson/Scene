@@ -3,7 +3,7 @@
 
 ReactUpdateQueue = require "ReactUpdateQueue"
 emptyFunction = require "emptyFunction"
-Event = require "Event"
+Event = require "eve"
 View = require "modx/lib/View"
 modx = require "modx"
 
@@ -114,13 +114,9 @@ type.definePrototype
 type.defineMethods
 
   onceMounted: (callback) ->
-
     if @view and ReactUpdateQueue.isMounted @view
-      callback()
-      return
-
-    listener = @didMount 1, callback
-    return listener.start()
+    then callback()
+    else @didMount.once callback
 
 type.defineHooks
 

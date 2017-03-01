@@ -4,7 +4,7 @@
 emptyFunction = require "emptyFunction"
 SortedArray = require "sorted-array"
 assertType = require "assertType"
-Event = require "Event"
+Event = require "eve"
 View = require "modx/lib/View"
 sync = require "sync"
 modx = require "modx"
@@ -52,8 +52,7 @@ type.defineMethods
 
     if Array.isArray scene
       scene.forEach (scene) => @insert scene
-      if onUpdate
-        @_didUpdate(1, onUpdate).start()
+      @_didUpdate.once onUpdate if onUpdate
       return
 
     assertType scene, Scene.Kind
