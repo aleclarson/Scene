@@ -20,10 +20,6 @@
     "react-validators": "aleclarson/react-validators#1.0.1"
   },
   "implicitDependencies": [
-    "ReactComponent",
-    "ReactInstanceMap",
-    "ReactNativeComponentTree",
-    "ReactNativeTreeTraversal",
-    "ReactUpdateQueue"
+    "react-native"
   ]
 }

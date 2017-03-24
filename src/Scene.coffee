@@ -1,7 +1,7 @@
 
 {Style, Children} = require "react-validators"
 
-ReactUpdateQueue = require "ReactUpdateQueue"
+ReactUpdateQueue = require "react-native/lib/ReactUpdateQueue"
 emptyFunction = require "emptyFunction"
 Event = require "eve"
 View = require "modx/lib/View"

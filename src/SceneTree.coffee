@@ -1,8 +1,8 @@
 
-ReactNativeComponentTree = require "ReactNativeComponentTree"
-ReactNativeTreeTraversal = require "ReactNativeTreeTraversal"
+ReactComponentTree = require "ReactComponentTree"
+ReactTreeTraversal = require "ReactTreeTraversal"
 ReactInstanceMap = require "ReactInstanceMap"
-ReactComponent = require "ReactComponent"
+ReactComponent = require "react/lib/ReactComponent"
 emptyFunction = require "emptyFunction"
 Type = require "Type"
 
@@ -16,12 +16,12 @@ type.defineMethods
 
   findScene: (view, filter = emptyFunction.thatReturnsTrue) ->
     assertView view
-    inst = getNativeInstance view
+    inst = getReactInstance view
     while inst
-      tag = ReactNativeComponentTree.getNodeFromInstance inst
+      tag = ReactComponentTree.getNodeFromInstance inst
       scene = @_tree[tag]
       return scene if scene and filter scene
-      inst = ReactNativeTreeTraversal.getParentInstance inst
+      inst = ReactTreeTraversal.getParentInstance inst
     return null
 
   findChain: (view) ->
@@ -39,7 +39,7 @@ type.defineMethods
     unless scene.view
       throw Error "Scene must be mounted!"
 
-    tag = getNativeTag scene.view
+    tag = getReactTag scene.view
     unless @_tree[tag]
       @_tree[tag] = scene
       return
@@ -51,7 +51,7 @@ type.defineMethods
     unless scene.view
       throw Error "Scene must be mounted!"
 
-    tag = getNativeTag scene.view
+    tag = getReactTag scene.view
     delete @_tree[tag]
 
 module.exports = type.construct()
@@ -70,11 +70,11 @@ belongsToChain = (scene) ->
 belongsToCollection = (scene) ->
   scene.collection isnt null
 
-getNativeInstance = (view) ->
+getReactInstance = (view) ->
   inst = ReactInstanceMap.get view
   inst = next while next = inst._renderedComponent
   return inst
 
-getNativeTag = (view) ->
-  inst = getNativeInstance view
-  return ReactNativeComponentTree.getNodeFromInstance inst
+getReactTag = (view) ->
+  inst = getReactInstance view
+  return ReactComponentTree.getTagFromInstance inst
