@@ -125,28 +125,28 @@ type.defineProps
   children: Children
 
 type.render ->
+
+  background = View
+    style: containerStyle
+    pointerEvents: @_backgroundEvents
+    onStartShouldSetResponder: emptyFunction.thatReturnsTrue
+    children: @__renderBackground()
+
+  foreground = View
+    style: containerStyle
+    pointerEvents: @_foregroundEvents
+    children: @__renderForeground()
+
   return View
-    style: @styles.container()
     pointerEvents: @_containerEvents
-    children: [
-      @_renderBackground()
-      @_renderForeground()
+    style: [
+      containerStyle
+      opacity: @_containerOpacity
     ]
-
-type.defineMethods
-
-  _renderBackground: ->
-    return View
-      style: @styles.background()
-      pointerEvents: @_backgroundEvents
-      onStartShouldSetResponder: emptyFunction.thatReturnsTrue
-      children: @__renderBackground()
-
-  _renderForeground: ->
-    return View
-      style: @styles.foreground()
-      pointerEvents: @_foregroundEvents
-      children: @__renderForeground()
+    children: [
+      background
+      foreground
+    ]
 
 type.defineHooks
 
@@ -154,19 +154,12 @@ type.defineHooks
 
   __renderBackground: emptyFunction
 
-type.defineStyles
-
-  container:
-    cover: yes
-    clear: yes
-    opacity: -> @_containerOpacity
-
-  background:
-    cover: yes
-    clear: yes
-
-  foreground:
-    cover: yes
-    clear: yes
-
 module.exports = Scene = type.build()
+
+containerStyle =
+  position: "absolute"
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  backgroundColor: "transparent"
