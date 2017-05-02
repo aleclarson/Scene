@@ -5,36 +5,33 @@
 
 assertType = require "assertType"
 isType = require "isType"
-Event = require "eve"
 modx = require "modx"
+has = require "has"
 
+SceneCollection = require "./SceneCollection"
+SceneChain = require "./SceneChain"
 Scene = require "./Scene"
 
 type = modx.Type "SceneRouter"
-
-type.defineArgs
-  events: Event.Map
-
-type.defineValues (options) ->
-  return options
 
 type.defineGetters
 
   root: -> @_root
 
   path: ->
+    if scene = @current
+    then scene.path
+    else null
+
+  current: ->
     if @_root
-    then @_chains[@_root].path
+    then @_chains[@_root].current
     else null
 
   chain: ->
     if @_root
     then @_chains[@_root]
     else null
-
-type.render ->
-  props = Object.assign {}, @props
-  @_scenes.render props
 
 type.defineMethods
 
@@ -55,61 +52,87 @@ type.defineMethods
       @addLoader path, loader
     return
 
-  # Get a root scene by its path.
-  # Returns a scene factory if its path is provided.
-  get: (path) -> @_routes[path]
+  get: (path) ->
+    if isType path, Number
+    then @_scenes.array[path]
+    else @_routes[path]
 
-  # Set the current root scene (and mount if needed).
   set: (path, options) ->
     assertType path, String
-    return if path is @_root
+
+    if path is @_root
+      return @_routes[path]
 
     if @_root isnt null
-      scene = @_routes[@_root]
+      scene = @_chains[@_root].current
       scene.__onInactive()
 
     scene = @_load path, options
-    @_startChain scene, path
 
-    @_root = path
-    scene.__onActive()
+    unless isType options, Object.Maybe
+      options = undefined
+
+    @_root = scene.path
+    @_markActive scene, options
     return scene
 
-  # Mount a root scene, but don't set it as current.
   insert: (path, options) ->
     assertType path, String
+    return @_load path, options
+
+  push: (path, options) ->
+    assertType path, String
+
+    unless @_root
+      throw Error "Cannot call 'push' before 'set'!"
+
     scene = @_load path, options
-    @_startChain scene, path
+
+    unless isType options, Object.Maybe
+      options = undefined
+
+    @_chains[@_root].push scene, options
     return scene
 
-  # Unmounts a root scene, or unloads a scene factory.
+  pop: ->
+    return null unless @_root
+    scene = @_chains[@_root].pop()
+
+    if scene.path is @_root
+      delete @_chains[@_root]
+      @_root = null
+
+    unless scene.isPermanent
+      @_scenes.remove scene
+      delete @_routes[scene.path]
+
+    return scene
+
   remove: (path) ->
+    assertType path, String
+
+    unless scene = @_routes[path]
+      return null
 
     if path is @_root
       @_root = null
 
-    scene = @_routes[path]
-    return if scene is undefined
+    unless chain = scene.chain
+      return scene
 
-    if scene instanceof Scene
-      @_scenes.remove scene
-      # TODO: Remove every scene in the root chain.
+    while chain.length
+      current = chain.pop()
 
-    delete @_routes[path]
-    return
+      unless current.isPermanent
+        @_scenes.remove current
+        delete @_routes[current.path]
 
-  # Push a scene onto the current root's scene chain.
-  push: (path, options) ->
-    assertType path, String
-    assertType options, Object.or Scene.Kind
+      break if scene is current
 
-    scene =
-      if isType options, Object
-      then @_load path, options
-      else options
+    unless chain.length
+      delete @_chains[path]
 
-    @chain.push scene, path
-    return
+    return scene
 
   reset: ->
     Object.assign this, getInitialValue()
@@ -117,64 +140,86 @@ type.defineMethods
     return
 
 #
-# Internals
+# Rendering
+#
+
+type.render ->
+  props = Object.assign {}, @props
+  props.style ?= @styles.container()
+  return @_scenes.render props
+
+type.defineStyles
+
+  container:
+    cover: yes
+    backgroundColor: "#000"
+
+#
+# Internal
 #
 
 type.defineValues getInitialValue = ->
 
   _root: null
 
-  _scenes: Scene.Collection()
+  _scenes: SceneCollection()
 
   # The router manages a stack of scenes for every root path.
   _chains: Object.create null
 
-  # The map of `Scene` instances and/or factories.
+  # The map of `Scene` instances.
   _routes: Object.create null
 
-  # The map of "route loaders".
+  # The map of `Scene` loaders.
   _loaders: Object.create null
 
 type.defineMethods
 
-  # If the `path` points to a scene factory, the `options` are used to construct an instance.
-  # If the `path` points to a `Scene` instance, the `options` are ignored.
-  # The `options` can be a `Scene` instance if you want to add a root scene.
-  # Otherwise, some route is lazy-loaded by its `path`.
   _load: (path, options) ->
-    scene = @_routes[path]
 
-    if options instanceof Scene
+    if isType options, Object.Maybe
 
-      if typeof scene is "function"
-        throw Error "Cannot overwrite a scene factory: '#{path}'"
-
-      if scene isnt undefined
-        throw Error "A root scene already exists with path: '#{path}'"
-
-      @_routes[path] = scene = options
-
-    else if scene is undefined
+      # Check if the scene is already loaded.
+      return scene if scene = @_routes[path]
 
       unless loader = @_loaders[path]
-        throw Error "Invalid path: '#{path}'"
+        throw Error "Failed to load scene: '#{path}'"
 
-      @_routes[path] = scene = loader()
+      # Load the scene on-demand.
+      scene = loader()
 
-    if typeof scene is "function"
-      scene = scene options
+      # Loaders may return a scene factory.
+      if typeof scene is "function"
+        scene = scene options
 
-    else if options isnt undefined
-      throw Error "The 'options' argument is only for scene factories!"
+    else if has @_loaders, path
+      throw Error "Cannot overwrite a scene loader: '#{path}'"
 
+    else if has @_routes, path
+      throw Error "Cannot overwrite an existing scene: '#{path}'"
+
+    # They passed a `Scene` instance.
+    else scene = options
+
+    unless scene instanceof Scene
+      throw Error "Expected a kind of Scene!"
+
+    # Ensure the scene has a path.
+    scene.path ?= path
+
+    @_routes[scene.path] = scene
     @_scenes.insert scene
     return scene
 
-  _startChain: (scene, path) ->
-    unless @_chains[path]
-      chain = Scene.Chain()
-      chain.push scene, path
-      @_chains[path] = chain
+  _markActive: (scene, options) ->
+
+    if scene.chain
+      scene.__onActive options
+      return
+
+    chain = SceneChain()
+    chain.push scene, options
+    @_chains[scene.path] = chain
     return
 
 module.exports = type.build()

@@ -13,9 +13,6 @@ Scene = require "./Scene"
 
 type = modx.Type "SceneCollection"
 
-type.defineStatics
-  find: (view) -> SceneTree.findCollection view
-
 type.defineValues (options) ->
 
   _elements: {}
@@ -42,14 +39,13 @@ type.defineGetters
 type.defineMethods
 
   insert: (scene, onUpdate) ->
+    assertType scene, Array.or Scene.Kind
     assertType onUpdate, Function.Maybe
 
     if Array.isArray scene
-      scene.forEach (scene) => @insert scene
+      scene.forEach @insert.bind this
       @_didUpdate.once onUpdate if onUpdate
       return
-
-    assertType scene, Scene.Kind
 
     if scene.collection is this
       return # Already in this collection!
@@ -68,7 +64,6 @@ type.defineMethods
     return
 
   remove: (scene) ->
-
     assertType scene, Scene.Kind
 
     if scene.collection isnt this
@@ -85,7 +80,6 @@ type.defineMethods
     return
 
   searchBelow: (scene, filter) ->
-
     assertType scene, Scene.Kind
 
     if scene.collection isnt this
@@ -105,6 +99,18 @@ type.defineMethods
 
     return results
 
+type.defineStatics
+
+  find: (view) ->
+    SceneTree.findCollection view
+
+#
+# Rendering
+#
+
+type.defineProps
+  style: Style
+
 # Protect against re-renders by the parent.
 type.shouldUpdate ->
   return no
@@ -114,13 +120,6 @@ type.didMount ->
 
 type.didUpdate ->
   @_didUpdate.emit()
-
-#
-# Rendering
-#
-
-type.defineProps
-  style: Style
 
 type.render ->
 
@@ -140,5 +139,8 @@ type.render ->
   return View
     style: @props.style
     children: children
+    # TODO: Find better way to enable touch events.
+    onResponderStart: emptyFunction
+    onResponderEnd: emptyFunction
 
 module.exports = type.build()

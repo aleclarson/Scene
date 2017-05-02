@@ -11,12 +11,6 @@ SceneTree = require "./SceneTree"
 
 type = modx.Type "Scene"
 
-type.defineStatics
-  find: (view) -> SceneTree.findScene view
-  Chain: lazy: -> require "./SceneChain"
-  Collection: lazy: -> require "./SceneCollection"
-  Router: lazy: -> require "./SceneRouter"
-
 type.defineArgs
   level: Number
   isHidden: Boolean
@@ -24,11 +18,11 @@ type.defineArgs
   ignoreTouches: Boolean
   ignoreTouchesBelow: Boolean
 
-type.defineFrozenValues ->
+type.defineValues ->
+
+  path: null
 
   didMount: Event()
-
-  didUpdate: Event()
 
 type.defineReactiveValues (options) ->
 
@@ -76,6 +70,8 @@ type.defineGetters
 
   collection: -> @_collection
 
+  isActive: -> @_chain and @_chain.current is this
+
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
@@ -106,15 +102,10 @@ type.defineHooks
 
   __onRemove: emptyFunction
 
-type.didMount ->
-  SceneTree._addScene this
-  @didMount.emit()
+type.defineStatics
 
-type.didUpdate ->
-  @didUpdate.emit()
-
-type.willUnmount ->
-  SceneTree._removeScene this
+  find: (view) ->
+    SceneTree.findScene view
 
 #
 # Rendering
@@ -123,6 +114,18 @@ type.willUnmount ->
 type.defineProps
   style: Style
   children: Children
+
+type.didMount ->
+  SceneTree._addScene this
+  @didMount.emit()
+  return
+
+type.shouldUpdate ->
+  return no
+
+type.willUnmount ->
+  SceneTree._removeScene this
+  return
 
 type.render ->
 

@@ -18,7 +18,7 @@ type.defineMethods
     assertView view
     inst = getReactInstance view
     while inst
-      tag = ReactComponentTree.getNodeFromInstance inst
+      tag = ReactComponentTree.getTagFromInstance inst
       scene = @_tree[tag]
       return scene if scene and filter scene
       inst = ReactTreeTraversal.getParentInstance inst
