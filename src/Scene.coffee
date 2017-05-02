@@ -1,7 +1,7 @@
 
 {Style, Children} = require "react-validators"
 
-ReactUpdateQueue = require "ReactUpdateQueue"
+ReactUpdateQueue = require "react-native/lib/ReactUpdateQueue"
 emptyFunction = require "emptyFunction"
 Event = require "eve"
 View = require "modx/lib/View"
@@ -11,12 +11,6 @@ SceneTree = require "./SceneTree"
 
 type = modx.Type "Scene"
 
-type.defineStatics
-  find: (view) -> SceneTree.findScene view
-  Chain: lazy: -> require "./SceneChain"
-  Collection: lazy: -> require "./SceneCollection"
-  Router: lazy: -> require "./SceneRouter"
-
 type.defineArgs
   level: Number
   isHidden: Boolean
@@ -24,11 +18,11 @@ type.defineArgs
   ignoreTouches: Boolean
   ignoreTouchesBelow: Boolean
 
-type.defineFrozenValues ->
+type.defineValues ->
+
+  path: null
 
   didMount: Event()
-
-  didUpdate: Event()
 
 type.defineReactiveValues (options) ->
 
@@ -76,6 +70,8 @@ type.defineGetters
 
   collection: -> @_collection
 
+  isActive: -> @_chain and @_chain.current is this
+
   isTouchable: -> not @ignoreTouches
 
   isTouchableBelow: -> @ignoreTouches or not @ignoreTouchesBelow
@@ -106,15 +102,10 @@ type.defineHooks
 
   __onRemove: emptyFunction
 
-type.didMount ->
-  SceneTree._addScene this
-  @didMount.emit()
+type.defineStatics
 
-type.didUpdate ->
-  @didUpdate.emit()
-
-type.willUnmount ->
-  SceneTree._removeScene this
+  find: (view) ->
+    SceneTree.findScene view
 
 #
 # Rendering
@@ -124,29 +115,41 @@ type.defineProps
   style: Style
   children: Children
 
+type.didMount ->
+  SceneTree._addScene this
+  @didMount.emit()
+  return
+
+type.shouldUpdate ->
+  return no
+
+type.willUnmount ->
+  SceneTree._removeScene this
+  return
+
 type.render ->
+
+  background = View
+    style: containerStyle
+    pointerEvents: @_backgroundEvents
+    onStartShouldSetResponder: emptyFunction.thatReturnsTrue
+    children: @__renderBackground()
+
+  foreground = View
+    style: containerStyle
+    pointerEvents: @_foregroundEvents
+    children: @__renderForeground()
+
   return View
-    style: @styles.container()
     pointerEvents: @_containerEvents
-    children: [
-      @_renderBackground()
-      @_renderForeground()
+    style: [
+      containerStyle
+      opacity: @_containerOpacity
     ]
-
-type.defineMethods
-
-  _renderBackground: ->
-    return View
-      style: @styles.background()
-      pointerEvents: @_backgroundEvents
-      onStartShouldSetResponder: emptyFunction.thatReturnsTrue
-      children: @__renderBackground()
-
-  _renderForeground: ->
-    return View
-      style: @styles.foreground()
-      pointerEvents: @_foregroundEvents
-      children: @__renderForeground()
+    children: [
+      background
+      foreground
+    ]
 
 type.defineHooks
 
@@ -154,19 +157,12 @@ type.defineHooks
 
   __renderBackground: emptyFunction
 
-type.defineStyles
-
-  container:
-    cover: yes
-    clear: yes
-    opacity: -> @_containerOpacity
-
-  background:
-    cover: yes
-    clear: yes
-
-  foreground:
-    cover: yes
-    clear: yes
-
 module.exports = Scene = type.build()
+
+containerStyle =
+  position: "absolute"
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  backgroundColor: "transparent"

@@ -1,14 +1,12 @@
 
 assertType = require "assertType"
+isType = require "isType"
 Type = require "Type"
 
 SceneTree = require "./SceneTree"
 Scene = require "./Scene"
 
 type = Type "SceneChain"
-
-type.defineStatics
-  find: (view) -> SceneTree.findChain view
 
 type.defineArgs
   isHidden: Boolean
@@ -19,55 +17,56 @@ type.defineReactiveValues (options) ->
 
 type.defineGetters
 
-  path: -> @_path
+  length: -> @_length
 
-  last: -> @_last
+  current: -> @_current
 
-  scenes: -> @_scenes
+  scenes: ->
+    if @_current
+    then @_scenes.concat @_current
+    else []
 
 type.defineMethods
 
-  push: (scene, path) ->
+  push: (scene, options) ->
     assertType scene, Scene.Kind
-    assertType path, String.Maybe
+    assertType options, Object.Maybe
 
     if scene.chain isnt null
       throw Error "Scenes can only belong to one chain at a time!"
 
-    if @_last isnt null
-      @_last.__onInactive()
+    if @_current isnt null
+      @_current.__onInactive()
+      @_scenes.push @_current
 
+    @_length += 1
     scene._chain = this
-    scene.__onActive()
-
-    if path
-      @_paths.push path
-      @_path = path
-
-    @_scenes.push scene
-    @_last = scene
+    scene.__onActive options
+    @_current = scene
     return
 
   pop: ->
 
-    sceneCount = @_scenes.length
-    return if sceneCount is 0
+    if @_current is null
+      return null
 
-    scene = @_scenes.pop()
-    scene.__onInactive()
+    scene = @_current
     scene._chain = null
+    scene.__onInactive()
+    @_length -= 1
 
-    if sceneCount is 1
-      @_last = null
-      return
+    if current = @_scenes.pop()
+      current.__onActive()
+      @_current = current
+      return scene
 
-    if @_paths.length
-      @_paths.pop()
-      @_path = @_paths[sceneCount - 2]
+    @_current = null
+    return scene
 
-    @_last = @_scenes[sceneCount - 2]
-    @_last.__onActive()
-    return
+type.defineStatics
+
+  find: (view) ->
+    SceneTree.findChain view
 
 #
 # Internals
@@ -75,14 +74,12 @@ type.defineMethods
 
 type.defineValues ->
 
-  _paths: []
-
   _scenes: []
+
+  _length: 0
 
 type.defineReactiveValues
 
-  _path: null
-
-  _last: null
+  _current: null
 
 module.exports = type.build()
